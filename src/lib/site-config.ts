@@ -47,23 +47,33 @@ export const bainEnveloppe = {
 export const bienfaits = [
   {
     titre: "Apaisement du nouveau-né",
-    description: "[TEXTE À COMPLÉTER — apaisement du nouveau-né]",
+    description:
+      "La chaleur enveloppante de l'eau limite le réflexe de sursaut (Moro) et apaise pleurs et anxiété.",
+    icone: "/brand/icons/apaisement.jpg",
   },
   {
     titre: "Renforcement du lien parent-enfant",
-    description: "[TEXTE À COMPLÉTER — lien parent-enfant]",
+    description:
+      "Un moment de partage intense qui renforce la confiance et le lien d'attachement avec bébé.",
+    icone: "/brand/icons/lien-parent-enfant.jpg",
   },
   {
     titre: "Amélioration du sommeil",
-    description: "[TEXTE À COMPLÉTER — sommeil]",
+    description:
+      "Un rituel apaisant, particulièrement bénéfique en fin de journée pour favoriser l'endormissement.",
+    icone: "/brand/icons/amelioration-sommeil.jpg",
   },
   {
-    titre: "Portage et motricité",
-    description: "[TEXTE À COMPLÉTER — portage]",
+    titre: "Éveil sensoriel",
+    description:
+      "Une expérience sensorielle, émotionnelle et motrice qui stimule en douceur l'éveil de bébé.",
+    icone: "/brand/icons/eveil-sensoriel.jpg",
   },
   {
     titre: "Réassurance des parents",
-    description: "[TEXTE À COMPLÉTER — réassurance des parents]",
+    description:
+      "En observant les réactions de bébé, les parents gagnent en confiance et apprennent à lire ses besoins.",
+    icone: "/brand/icons/reassurance-parents.jpg",
   },
 ];
 

@@ -5,7 +5,7 @@ type Variant = "primary" | "secondary" | "ghost";
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-accent text-parchment hover:bg-accent-hover focus-visible:outline-accent",
+    "bg-accent text-parchment shadow-[0_0_20px_0_rgba(232,130,95,0.55)] hover:bg-accent-hover hover:shadow-[0_0_28px_2px_rgba(232,130,95,0.75)] focus-visible:outline-accent",
   secondary:
     "bg-transparent text-walnut border border-walnut hover:bg-walnut hover:text-parchment focus-visible:outline-walnut",
   ghost:
@@ -13,7 +13,7 @@ const variantClasses: Record<Variant, string> = {
 };
 
 const baseClasses =
-  "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export function ButtonLink({
   href,

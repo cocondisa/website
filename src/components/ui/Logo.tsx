@@ -54,7 +54,7 @@ export default function Logo({
         width={2394}
         height={372}
         priority
-        className="hidden h-10 w-auto sm:block sm:h-12"
+        className="hidden h-8 w-auto sm:block sm:h-[38px]"
       />
       <Image
         src="/brand/logoMobile.png"

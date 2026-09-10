@@ -41,15 +41,15 @@ export default function Navbar() {
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-walnut focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-[#E7825F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth={1.8}
+            strokeWidth={2.6}
             stroke="currentColor"
-            className="h-6 w-6"
+            className="h-[28px] w-[28px]"
             aria-hidden="true"
           >
             {open ? (
