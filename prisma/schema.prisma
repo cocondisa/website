@@ -1,0 +1,43 @@
+// Schéma Prisma — gestion des créneaux et réservations pour le bain enveloppé.
+// MVP : les créneaux sont créés directement en base (Prisma Studio ou script
+// de seed) par Isabelle. Une interface d'administration pourra être ajoutée
+// dans une itération suivante.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // connexion "pooled" (Supavisor/PgBouncer) — utilisée à l'exécution (serverless)
+  directUrl = env("DIRECT_URL") // connexion directe — utilisée par `prisma migrate` / `db push`
+}
+
+enum StatutReservation {
+  CONFIRMEE
+  ANNULEE
+}
+
+model Creneau {
+  id           String       @id @default(cuid())
+  date         DateTime // date et heure de début du créneau
+  dureeMinutes Int          @default(60)
+  disponible   Boolean      @default(true)
+  reservation  Reservation?
+  createdAt    DateTime     @default(now())
+
+  @@index([date])
+}
+
+model Reservation {
+  id           String            @id @default(cuid())
+  creneau      Creneau           @relation(fields: [creneauId], references: [id])
+  creneauId    String            @unique
+  nomComplet   String
+  email        String
+  telephone    String
+  infosBebe    String?
+  message      String?
+  statut       StatutReservation @default(CONFIRMEE)
+  createdAt    DateTime          @default(now())
+}

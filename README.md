@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cocon d'Isa
 
-## Getting Started
+Site vitrine et réservation en ligne pour Cocon d'Isa (bain enveloppé pour
+nouveau-nés, 0-2 mois).
 
-First, run the development server:
+## Stack
+
+- Next.js (App Router) + TypeScript
+- Tailwind CSS (palette définie en variables CSS dans `src/app/globals.css`
+  et exposée via `tailwind.config.ts`)
+- Prisma (v6) + PostgreSQL (Neon / Vercel Postgres / Supabase)
+- Resend pour les e-mails transactionnels
+
+## Démarrage
 
 ```bash
+npm install
+cp .env.example .env    # puis renseigner les variables (voir ci-dessous)
+npm run db:migrate      # crée les tables en base
+npm run db:seed         # créneaux de test (à remplacer par les vraies disponibilités)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables d'environnement
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Voir `.env.example` :
 
-## Learn More
+- `DATABASE_URL` — chaîne de connexion PostgreSQL.
+- `RESEND_API_KEY` — clé API Resend.
+- `NOTIFICATION_EMAIL` — e-mail d'Isabelle recevant les notifications de RDV.
 
-To learn more about Next.js, take a look at the following resources:
+## Gestion des créneaux (MVP)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Pour cette première version, les créneaux disponibles sont gérés directement
+en base (table `Creneau`), via `npm run db:studio` (Prisma Studio) ou un
+script de seed. Une interface d'administration dédiée pourra être ajoutée
+dans une itération suivante.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Déploiement
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Déploiement automatique sur Vercel à chaque push sur `main`. Penser à
+configurer les variables d'environnement ci-dessus dans le dashboard Vercel.
