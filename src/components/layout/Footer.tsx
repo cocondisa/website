@@ -31,6 +31,7 @@ export default function Footer() {
                   {contact.email}
                 </a>
               </li>
+              <li>{contact.adresseCabinet}</li>
               <li>{contact.zone}</li>
             </ul>
             <div className="mt-4 flex gap-4">

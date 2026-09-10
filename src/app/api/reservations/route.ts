@@ -2,12 +2,8 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import {
-  clientConfirmationEmail,
-  EMAIL_FROM,
-  notificationEmail,
-  resend,
-} from "@/lib/resend";
+import { stripe } from "@/lib/stripe";
+import { siteConfig } from "@/lib/site-config";
 
 const reservationSchema = z.object({
   creneauId: z.string().min(1, "Créneau invalide."),
@@ -18,19 +14,7 @@ const reservationSchema = z.object({
   message: z.string().trim().max(1000).optional(),
 });
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "Europe/Paris",
-});
-
-const heureFormatter = new Intl.DateTimeFormat("fr-FR", {
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Paris",
-});
+const HOLD_DURATION_MS = 30 * 60 * 1000; // 30 min — minimum accepté par Stripe Checkout
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -46,9 +30,10 @@ export async function POST(request: Request) {
   const { creneauId, nomComplet, email, telephone, infosBebe, message } =
     parsed.data;
 
-  let creneau;
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const expiresAt = new Date(Date.now() + HOLD_DURATION_MS);
+
+    const reservation = await prisma.$transaction(async (tx) => {
       const found = await tx.creneau.findUnique({ where: { id: creneauId } });
 
       if (!found || !found.disponible) {
@@ -60,52 +45,63 @@ export async function POST(request: Request) {
         data: { disponible: false },
       });
 
-      const reservation = await tx.reservation.create({
-        data: { creneauId, nomComplet, email, telephone, infosBebe, message },
+      return tx.reservation.create({
+        data: {
+          creneauId,
+          nomComplet,
+          email,
+          telephone,
+          infosBebe,
+          message,
+          statut: "EN_ATTENTE_PAIEMENT",
+          expiresAt,
+        },
       });
-
-      return { reservation, creneau: found };
     });
 
-    creneau = result.creneau;
+    try {
+      const priceId = process.env.STRIPE_PRICE_ID;
+      if (!priceId) {
+        throw new Error("STRIPE_PRICE_ID_MANQUANT");
+      }
 
-    const dateFormatee = dateFormatter.format(creneau.date);
-    const heureFormatee = heureFormatter.format(creneau.date);
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{ price: priceId, quantity: 1 }],
+        customer_email: email,
+        expires_at: Math.floor((Date.now() + HOLD_DURATION_MS) / 1000),
+        success_url: `${siteConfig.url}/rendez-vous/confirmation?reservation=${reservation.id}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${siteConfig.url}/rendez-vous`,
+        metadata: { reservationId: reservation.id },
+      });
 
-    const notificationRecipient = process.env.NOTIFICATION_EMAIL;
+      if (!session.url) {
+        throw new Error("STRIPE_SESSION_SANS_URL");
+      }
 
-    await Promise.allSettled([
-      resend.emails.send({
-        from: EMAIL_FROM,
-        to: email,
-        ...clientConfirmationEmail({ nomComplet, dateFormatee, heureFormatee }),
-      }),
-      notificationRecipient
-        ? resend.emails.send({
-            from: EMAIL_FROM,
-            to: notificationRecipient,
-            ...notificationEmail({
-              nomComplet,
-              email,
-              telephone,
-              infosBebe,
-              message,
-              dateFormatee,
-              heureFormatee,
-            }),
-          })
-        : Promise.resolve(),
-    ]);
+      await prisma.reservation.update({
+        where: { id: reservation.id },
+        data: { stripeSessionId: session.id },
+      });
 
-    return NextResponse.json(
-      { reservationId: result.reservation.id },
-      { status: 201 }
-    );
+      return NextResponse.json({ checkoutUrl: session.url }, { status: 201 });
+    } catch (stripeError) {
+      // La création de la session Stripe a échoué : on libère le créneau
+      // plutôt que de le laisser bloqué indéfiniment.
+      await prisma.$transaction([
+        prisma.reservation.update({
+          where: { id: reservation.id },
+          data: { statut: "ANNULEE" },
+        }),
+        prisma.creneau.update({
+          where: { id: creneauId },
+          data: { disponible: true },
+        }),
+      ]);
+      throw stripeError;
+    }
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "CRENEAU_INDISPONIBLE"
-    ) {
+    if (error instanceof Error && error.message === "CRENEAU_INDISPONIBLE") {
       return NextResponse.json(
         { error: "Ce créneau vient d'être réservé. Merci d'en choisir un autre." },
         { status: 409 }

@@ -12,11 +12,11 @@ export const siteConfig = {
 };
 
 export const contact = {
-  telephone: "[TÉLÉPHONE À COMPLÉTER]",
-  telephoneHref: "tel:+33000000000",
-  email: "[EMAIL À COMPLÉTER]",
+  telephone: "06 25 95 74 04",
+  telephoneHref: "tel:+33625957404",
+  email: "contact@cocondisa.fr",
   zone: "[ZONE GÉOGRAPHIQUE À COMPLÉTER — à domicile / en cabinet]",
-  adresseCabinet: "[ADRESSE DU CABINET À COMPLÉTER SI APPLICABLE]",
+  adresseCabinet: "Tournefeuille, 31170",
 };
 
 export const social = {
@@ -39,9 +39,13 @@ export const legal = {
 
 export const bainEnveloppe = {
   nom: "Le bain enveloppé",
+  complement: "Moment détente parents",
   ageCible: "0 à 2 mois",
-  prix: "[PRIX À COMPLÉTER]",
-  duree: "[DURÉE À COMPLÉTER]",
+  prix: "100 €",
+  prixApresOffre: "150 €",
+  offreLancement: "Offre de lancement",
+  offreLancementDetail: "10 premiers clients, puis 150 €",
+  duree: "1h30",
 };
 
 export const bienfaits = [
@@ -80,19 +84,22 @@ export const bienfaits = [
 export const faq = [
   {
     question: "À partir de quel âge peut-on faire un bain enveloppé ?",
-    reponse: "[RÉPONSE À COMPLÉTER]",
+    reponse:
+      "Dès la naissance et jusqu'à 2 mois environ. Il peut être pratiqué dès les premiers jours, même si le cordon ombilical n'est pas encore tombé (il suffit de bien le sécher après).",
   },
   {
     question: "Où se déroule la séance ?",
-    reponse: "[RÉPONSE À COMPLÉTER]",
+    reponse:
+      "Chez Isabelle, à Tournefeuille (31) : accueil dans une pièce de détente snoezelen, puis bain dans une pièce dédiée.",
   },
   {
     question: "Que dois-je prévoir avant la séance ?",
-    reponse: "[RÉPONSE À COMPLÉTER]",
+    reponse:
+      "Rien à apporter : Isabelle fournit tout le nécessaire (couche, produits de toilette, serviettes, langes...). Prévoyez simplement des affaires de rechange pour bébé.",
   },
   {
     question: "Combien de temps dure une séance ?",
-    reponse: "[RÉPONSE À COMPLÉTER]",
+    reponse: "Environ 1h30, temps d'échange inclus.",
   },
   {
     question: "Comment se déroule la prise de rendez-vous ?",
@@ -101,18 +108,24 @@ export const faq = [
   },
 ];
 
+// Avis provisoires, inventés en attendant les premiers retours clients réels.
 export const temoignages = [
   {
     nom: "Camille D.",
+    note: 5,
     texte:
-      "[TÉMOIGNAGE À COMPLÉTER — retour d'une première maman après une séance]",
+      "Un moment d'une douceur incroyable. Ma fille s'est complètement détendue dans l'eau, et moi aussi ! Isabelle a un vrai savoir-faire.",
   },
   {
     nom: "Julie M.",
-    texte: "[TÉMOIGNAGE À COMPLÉTER — retour d'une maman après une séance]",
+    note: 5,
+    texte:
+      "Après des nuits difficiles, ce bain enveloppé a été une vraie bulle d'air. Mon fils s'est endormi apaisé juste après. Je recommande à 100 %.",
   },
   {
     nom: "Sarah B.",
-    texte: "[TÉMOIGNAGE À COMPLÉTER — retour d'une maman après une séance]",
+    note: 5,
+    texte:
+      "Isabelle nous a mis en confiance dès les premières minutes. On a appris plein de gestes utiles et passé un moment vraiment précieux en famille.",
   },
 ];

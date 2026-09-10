@@ -28,6 +28,9 @@ export default function Hero() {
           <h1 className="text-4xl font-bold leading-tight text-parchment sm:text-5xl">
             Bain enveloppé pour nouveau‑nés
           </h1>
+          <p className="text-sm font-medium text-peach">
+            📍 À Tournefeuille (31)
+          </p>
           <p className="max-w-md text-base text-parchment">
             Cocon d&apos;Isa accompagne les tout-petits (0 à 2 mois) et leurs
             parents avec le bain enveloppé, un moment d&apos;apaisement
@@ -48,6 +51,9 @@ export default function Hero() {
           <h1 className="text-5xl font-bold leading-tight text-walnut sm:text-6xl">
             Bain enveloppé pour nouveau‑nés
           </h1>
+          <p className="text-sm font-medium text-sage">
+            📍 À Tournefeuille (31)
+          </p>
           <p className="max-w-lg text-lg text-body">
             Cocon d&apos;Isa accompagne les tout-petits (0 à 2 mois) et leurs
             parents avec le bain enveloppé, un moment d&apos;apaisement

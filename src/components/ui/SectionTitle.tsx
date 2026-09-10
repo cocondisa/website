@@ -18,7 +18,7 @@ export default function SectionTitle({
           {eyebrow}
         </span>
       )}
-      <h2 className="text-3xl sm:text-4xl font-semibold text-walnut">{title}</h2>
+      <h2 className="text-4xl sm:text-5xl font-semibold text-walnut">{title}</h2>
       {description && (
         <p className="max-w-2xl text-base text-body">{description}</p>
       )}

@@ -22,7 +22,7 @@ export default function Presentation() {
           <span className="text-sm font-semibold uppercase tracking-widest text-sage">
             À propos
           </span>
-          <h2 className="text-3xl font-semibold text-walnut sm:text-4xl">
+          <h2 className="text-4xl font-semibold text-walnut sm:text-5xl">
             Isabelle, votre accompagnante bien-être
           </h2>
           <p className="text-base text-body">

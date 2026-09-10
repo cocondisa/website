@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import type { CreneauDisponible } from "@/types";
 
@@ -12,7 +11,6 @@ export default function BookingForm({
   creneau: CreneauDisponible;
   onCreneauIndisponible: () => void;
 }) {
-  const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,20 +41,27 @@ export default function BookingForm({
           "Ce créneau vient d'être réservé par quelqu'un d'autre. Merci de choisir un autre horaire."
         );
         onCreneauIndisponible();
+        setSubmitting(false);
         return;
       }
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
         setError(data?.error ?? "Une erreur est survenue. Merci de réessayer.");
+        setSubmitting(false);
         return;
       }
 
       const data = await res.json();
-      router.push(`/rendez-vous/confirmation?reservation=${data.reservationId}`);
+      if (!data.checkoutUrl) {
+        setError("Une erreur est survenue. Merci de réessayer.");
+        setSubmitting(false);
+        return;
+      }
+      // Pas de setSubmitting(false) ici : la page quitte vers Stripe Checkout.
+      window.location.href = data.checkoutUrl;
     } catch {
       setError("Une erreur réseau est survenue. Merci de réessayer.");
-    } finally {
       setSubmitting(false);
     }
   }

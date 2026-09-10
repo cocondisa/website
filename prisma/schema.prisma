@@ -1,7 +1,9 @@
 // Schéma Prisma — gestion des créneaux et réservations pour le bain enveloppé.
-// MVP : les créneaux sont créés directement en base (Prisma Studio ou script
-// de seed) par Isabelle. Une interface d'administration pourra être ajoutée
-// dans une itération suivante.
+// Les créneaux sont gérés par Isabelle via l'espace /admin (protégé par mot
+// de passe). Les réservations sont payées intégralement via Stripe Checkout :
+// une réservation EN_ATTENTE_PAIEMENT retient le créneau le temps du
+// paiement, puis passe à CONFIRMEE (webhook Stripe) ou est libérée si le
+// paiement expire/échoue.
 
 generator client {
   provider = "prisma-client-js"
@@ -14,6 +16,7 @@ datasource db {
 }
 
 enum StatutReservation {
+  EN_ATTENTE_PAIEMENT
   CONFIRMEE
   ANNULEE
 }
@@ -30,14 +33,36 @@ model Creneau {
 }
 
 model Reservation {
-  id           String            @id @default(cuid())
-  creneau      Creneau           @relation(fields: [creneauId], references: [id])
-  creneauId    String            @unique
-  nomComplet   String
-  email        String
-  telephone    String
-  infosBebe    String?
-  message      String?
-  statut       StatutReservation @default(CONFIRMEE)
-  createdAt    DateTime          @default(now())
+  id              String            @id @default(cuid())
+  creneau         Creneau           @relation(fields: [creneauId], references: [id])
+  creneauId       String            @unique
+  nomComplet      String
+  email           String
+  telephone       String
+  infosBebe       String?
+  message         String?
+  statut          StatutReservation @default(EN_ATTENTE_PAIEMENT)
+  stripeSessionId String?           @unique
+  expiresAt       DateTime? // retenue expirée = créneau libérable si le paiement n'a pas abouti
+  createdAt       DateTime          @default(now())
+}
+
+// Périodes de vacances / jours off d'Isabelle : masquent automatiquement les
+// créneaux qui y tombent, sans avoir à les supprimer un par un.
+model Vacances {
+  id        String   @id @default(cuid())
+  debut     DateTime // 00:00 du premier jour
+  fin       DateTime // 23:59:59 du dernier jour
+  label     String?
+  createdAt DateTime @default(now())
+
+  @@index([debut, fin])
+}
+
+// Ligne unique (id fixe "default") pour les réglages globaux du site :
+// bandeau d'annonce affichable/masquable par Isabelle depuis l'admin.
+model Parametres {
+  id             String  @id @default("default")
+  bandeauActif   Boolean @default(false)
+  bandeauMessage String  @default("")
 }
