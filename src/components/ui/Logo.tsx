@@ -6,9 +6,10 @@ import { useState } from "react";
 import { siteConfig } from "@/lib/site-config";
 
 /**
- * Le fichier /public/logo.png (et /public/logo-white.png pour le footer)
- * n'est pas encore fourni : on retombe sur un logo texte tant que
- * l'image n'est pas disponible ou si elle échoue à charger.
+ * Logo par défaut : lockup large (desktop) + marque compacte (mobile),
+ * fournis dans /public/brand. La version blanche du footer
+ * (/public/logo-white.png) n'a pas encore été fournie : fallback texte
+ * tant que le fichier est absent ou échoue à charger.
  */
 export default function Logo({
   variant = "default",
@@ -17,18 +18,30 @@ export default function Logo({
   variant?: "default" | "white";
   className?: string;
 }) {
-  const [imageFailed, setImageFailed] = useState(false);
-  const src = variant === "white" ? "/logo-white.png" : "/logo.png";
+  const [whiteLogoFailed, setWhiteLogoFailed] = useState(false);
 
-  if (imageFailed) {
+  if (variant === "white") {
+    if (whiteLogoFailed) {
+      return (
+        <Link
+          href="/"
+          className={`text-xl font-semibold tracking-tight text-parchment ${className}`}
+        >
+          {siteConfig.shortName}
+        </Link>
+      );
+    }
+
     return (
-      <Link
-        href="/"
-        className={`font-semibold text-xl tracking-tight ${
-          variant === "white" ? "text-parchment" : "text-walnut"
-        } ${className}`}
-      >
-        {siteConfig.shortName}
+      <Link href="/" className={`inline-flex items-center ${className}`}>
+        <Image
+          src="/logo-white.png"
+          alt={siteConfig.name}
+          width={160}
+          height={48}
+          className="h-9 w-auto sm:h-10"
+          onError={() => setWhiteLogoFailed(true)}
+        />
       </Link>
     );
   }
@@ -36,13 +49,20 @@ export default function Logo({
   return (
     <Link href="/" className={`inline-flex items-center ${className}`}>
       <Image
-        src={src}
+        src="/brand/logo.png"
         alt={siteConfig.name}
-        width={160}
-        height={48}
+        width={2394}
+        height={372}
         priority
-        className="h-10 w-auto sm:h-12"
-        onError={() => setImageFailed(true)}
+        className="hidden h-10 w-auto sm:block sm:h-12"
+      />
+      <Image
+        src="/brand/logoMobile.png"
+        alt={siteConfig.name}
+        width={310}
+        height={372}
+        priority
+        className="h-10 w-auto sm:hidden"
       />
     </Link>
   );
