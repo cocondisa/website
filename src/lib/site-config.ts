@@ -15,7 +15,7 @@ export const contact = {
   telephone: "06 25 95 74 04",
   telephoneHref: "tel:+33625957404",
   email: "contact@cocondisa.fr",
-  zone: "À domicile",
+  zone: "Reçoit à son domicile",
   adresseCabinet: "Tournefeuille, 31170",
 };
 
@@ -27,7 +27,7 @@ export const social = {
 export const legal = {
   raisonSociale: "Isabelle Messal",
   statut: "Auto-entrepreneuse",
-  siret: "898 887 229",
+  siret: "898 887 229 00026",
   adresseSiege: "9 rue des Rossignols, 31170 Tournefeuille",
   directeurPublication: "Isabelle Messal",
   hebergeur: {

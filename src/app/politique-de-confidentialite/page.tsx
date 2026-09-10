@@ -66,8 +66,7 @@ export default function PolitiqueConfidentialitePage() {
         <div className="flex flex-col gap-3 text-body">
           <h2 className="text-xl font-semibold text-walnut">Cookies</h2>
           <p>
-            Ce site n&apos;utilise pas de cookies de suivi publicitaire. [À
-            COMPLÉTER si un outil de mesure d&apos;audience est ajouté.]
+            Ce site n&apos;utilise pas de cookies de suivi publicitaire.
           </p>
         </div>
       </Container>
