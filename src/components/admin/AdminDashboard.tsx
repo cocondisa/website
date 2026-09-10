@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 
 type CreneauAdmin = {
@@ -34,7 +33,6 @@ const statutLabels: Record<string, { label: string; className: string }> = {
 };
 
 export default function AdminDashboard() {
-  const router = useRouter();
   const [creneaux, setCreneaux] = useState<CreneauAdmin[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -131,24 +129,9 @@ export default function AdminDashboard() {
     reload();
   }
 
-  async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
-    router.refresh();
-  }
-
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-walnut">Réservations</h1>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="text-sm text-accent underline underline-offset-4"
-        >
-          Se déconnecter
-        </button>
-      </div>
+      <h1 className="text-2xl font-semibold text-walnut">Réservations</h1>
 
       <p className="text-sm text-body">
         Votre disponibilité habituelle est gérée dans « Disponibilités
