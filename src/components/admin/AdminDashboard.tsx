@@ -140,7 +140,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex flex-col gap-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-walnut">Créneaux &amp; réservations</h1>
+        <h1 className="text-2xl font-semibold text-walnut">Réservations</h1>
         <button
           type="button"
           onClick={handleLogout}
@@ -149,6 +149,13 @@ export default function AdminDashboard() {
           Se déconnecter
         </button>
       </div>
+
+      <p className="text-sm text-body">
+        Votre disponibilité habituelle est gérée dans « Disponibilités
+        récurrentes » ci-dessus — pas besoin de la définir ici. Cette liste
+        ne montre que les rendez-vous déjà réservés, ainsi que les créneaux
+        exceptionnels ajoutés à la main.
+      </p>
 
       <form
         onSubmit={handleAddCreneau}
@@ -193,7 +200,7 @@ export default function AdminDashboard() {
       {!creneaux ? (
         <p className="text-sm text-body">Chargement…</p>
       ) : creneaux.length === 0 ? (
-        <p className="text-sm text-body">Aucun créneau à venir. Ajoutez-en un ci-dessus.</p>
+        <p className="text-sm text-body">Aucune réservation à venir pour le moment.</p>
       ) : (
         <div className="flex max-h-[32rem] flex-col divide-y divide-border overflow-y-auto rounded-2xl border border-border bg-white/60">
           {creneaux.map((creneau) => {

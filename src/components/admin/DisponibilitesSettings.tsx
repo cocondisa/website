@@ -109,41 +109,38 @@ export default function DisponibilitesSettings() {
       <div>
         <p className="text-sm font-medium text-walnut">Jours et demi-journées travaillés</p>
         <div className="mt-3 flex flex-col gap-1.5">
-          <div className="grid grid-cols-[6rem_1fr_1fr] gap-2 text-xs font-semibold uppercase tracking-wide text-body">
-            <span />
-            <span>Matin</span>
-            <span>Après-midi</span>
-          </div>
           {jours.map(({ prefix, label }) => {
             const matinCle = `${prefix}Matin`;
             const apresMidiCle = `${prefix}ApresMidi`;
             return (
-              <div key={prefix} className="grid grid-cols-[6rem_1fr_1fr] items-center gap-2">
-                <span className="text-sm text-walnut">{label}</span>
-                <button
-                  type="button"
-                  onClick={() => toggle(matinCle)}
-                  aria-pressed={d[matinCle]}
-                  className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-                    d[matinCle]
-                      ? "border-accent bg-accent text-parchment"
-                      : "border-border bg-parchment text-walnut hover:border-accent"
-                  }`}
-                >
-                  {d[matinCle] ? "Actif" : "Off"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggle(apresMidiCle)}
-                  aria-pressed={d[apresMidiCle]}
-                  className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-                    d[apresMidiCle]
-                      ? "border-accent bg-accent text-parchment"
-                      : "border-border bg-parchment text-walnut hover:border-accent"
-                  }`}
-                >
-                  {d[apresMidiCle] ? "Actif" : "Off"}
-                </button>
+              <div key={prefix} className="flex items-center gap-3">
+                <span className="w-20 shrink-0 text-sm text-walnut">{label}</span>
+                <div className="inline-flex overflow-hidden rounded-full border border-border">
+                  <button
+                    type="button"
+                    onClick={() => toggle(matinCle)}
+                    aria-pressed={d[matinCle]}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      d[matinCle]
+                        ? "bg-accent text-parchment"
+                        : "bg-parchment text-walnut/60 hover:bg-peach/40"
+                    }`}
+                  >
+                    Matin
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggle(apresMidiCle)}
+                    aria-pressed={d[apresMidiCle]}
+                    className={`border-l border-border px-3 py-1.5 text-xs font-medium transition-colors ${
+                      d[apresMidiCle]
+                        ? "bg-accent text-parchment"
+                        : "bg-parchment text-walnut/60 hover:bg-peach/40"
+                    }`}
+                  >
+                    Après-midi
+                  </button>
+                </div>
               </div>
             );
           })}

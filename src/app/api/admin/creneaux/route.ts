@@ -8,8 +8,15 @@ export async function GET() {
   // consultation de l'admin (pas besoin de tâche planifiée pour le MVP).
   await regenererCreneauxAutomatiques();
 
+  // Isabelle est disponible en continu selon ses disponibilités récurrentes :
+  // inutile de lister les centaines de créneaux AUTO libres. Seuls les
+  // créneaux réservés (à gérer) et les ajouts manuels exceptionnels
+  // (qu'elle a explicitement créés) sont affichés ici.
   const creneaux = await prisma.creneau.findMany({
-    where: { date: { gte: new Date() } },
+    where: {
+      date: { gte: new Date() },
+      OR: [{ reservation: { isNot: null } }, { origine: "MANUEL" }],
+    },
     orderBy: { date: "asc" },
     include: {
       reservation: {
