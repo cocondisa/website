@@ -4,27 +4,35 @@ import { FormEvent, useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 
 type Disponibilite = {
-  lundi: boolean;
-  mardi: boolean;
-  mercredi: boolean;
-  jeudi: boolean;
-  vendredi: boolean;
-  samedi: boolean;
-  dimanche: boolean;
+  lundiMatin: boolean;
+  lundiApresMidi: boolean;
+  mardiMatin: boolean;
+  mardiApresMidi: boolean;
+  mercrediMatin: boolean;
+  mercrediApresMidi: boolean;
+  jeudiMatin: boolean;
+  jeudiApresMidi: boolean;
+  vendrediMatin: boolean;
+  vendrediApresMidi: boolean;
+  samediMatin: boolean;
+  samediApresMidi: boolean;
+  dimancheMatin: boolean;
+  dimancheApresMidi: boolean;
   heureDebut: string;
+  heureMidi: string;
   heureFin: string;
   dureeCreneauMinutes: number;
   maxRdvParJour: number;
 };
 
-const jours: { cle: keyof Disponibilite; label: string }[] = [
-  { cle: "lundi", label: "Lundi" },
-  { cle: "mardi", label: "Mardi" },
-  { cle: "mercredi", label: "Mercredi" },
-  { cle: "jeudi", label: "Jeudi" },
-  { cle: "vendredi", label: "Vendredi" },
-  { cle: "samedi", label: "Samedi" },
-  { cle: "dimanche", label: "Dimanche" },
+const jours: { prefix: string; label: string }[] = [
+  { prefix: "lundi", label: "Lundi" },
+  { prefix: "mardi", label: "Mardi" },
+  { prefix: "mercredi", label: "Mercredi" },
+  { prefix: "jeudi", label: "Jeudi" },
+  { prefix: "vendredi", label: "Vendredi" },
+  { prefix: "samedi", label: "Samedi" },
+  { prefix: "dimanche", label: "Dimanche" },
 ];
 
 export default function DisponibilitesSettings() {
@@ -50,8 +58,10 @@ export default function DisponibilitesSettings() {
     };
   }, []);
 
-  function toggleJour(cle: keyof Disponibilite) {
-    setDispo((prev) => (prev ? { ...prev, [cle]: !prev[cle] } : prev));
+  function toggle(cle: string) {
+    setDispo((prev) =>
+      prev ? { ...prev, [cle]: !(prev as unknown as Record<string, boolean>)[cle] } : prev
+    );
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -89,30 +99,52 @@ export default function DisponibilitesSettings() {
     return <p className="text-sm text-body">{error ?? "Chargement…"}</p>;
   }
 
+  const d = dispo as unknown as Record<string, boolean>;
+
   return (
     <form
       onSubmit={handleSubmit}
       className="flex flex-col gap-6 rounded-2xl border border-border bg-white/60 p-6"
     >
       <div>
-        <p className="text-sm font-medium text-walnut">Jours travaillés</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {jours.map(({ cle, label }) => {
-            const actif = dispo[cle] as boolean;
+        <p className="text-sm font-medium text-walnut">Jours et demi-journées travaillés</p>
+        <div className="mt-3 flex flex-col gap-1.5">
+          <div className="grid grid-cols-[6rem_1fr_1fr] gap-2 text-xs font-semibold uppercase tracking-wide text-body">
+            <span />
+            <span>Matin</span>
+            <span>Après-midi</span>
+          </div>
+          {jours.map(({ prefix, label }) => {
+            const matinCle = `${prefix}Matin`;
+            const apresMidiCle = `${prefix}ApresMidi`;
             return (
-              <button
-                key={cle}
-                type="button"
-                onClick={() => toggleJour(cle)}
-                aria-pressed={actif}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                  actif
-                    ? "border-accent bg-accent text-parchment"
-                    : "border-border bg-parchment text-walnut hover:border-accent"
-                }`}
-              >
-                {label}
-              </button>
+              <div key={prefix} className="grid grid-cols-[6rem_1fr_1fr] items-center gap-2">
+                <span className="text-sm text-walnut">{label}</span>
+                <button
+                  type="button"
+                  onClick={() => toggle(matinCle)}
+                  aria-pressed={d[matinCle]}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                    d[matinCle]
+                      ? "border-accent bg-accent text-parchment"
+                      : "border-border bg-parchment text-walnut hover:border-accent"
+                  }`}
+                >
+                  {d[matinCle] ? "Actif" : "Off"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggle(apresMidiCle)}
+                  aria-pressed={d[apresMidiCle]}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                    d[apresMidiCle]
+                      ? "border-accent bg-accent text-parchment"
+                      : "border-border bg-parchment text-walnut hover:border-accent"
+                  }`}
+                >
+                  {d[apresMidiCle] ? "Actif" : "Off"}
+                </button>
+              </div>
             );
           })}
         </div>
@@ -121,7 +153,7 @@ export default function DisponibilitesSettings() {
       <div className="flex flex-wrap gap-4">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="heureDebut" className="text-sm font-medium text-walnut">
-            Heure de début
+            Début de matinée
           </label>
           <input
             id="heureDebut"
@@ -132,8 +164,20 @@ export default function DisponibilitesSettings() {
           />
         </div>
         <div className="flex flex-col gap-1.5">
+          <label htmlFor="heureMidi" className="text-sm font-medium text-walnut">
+            Milieu de journée
+          </label>
+          <input
+            id="heureMidi"
+            type="time"
+            value={dispo.heureMidi}
+            onChange={(e) => setDispo({ ...dispo, heureMidi: e.target.value })}
+            className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
           <label htmlFor="heureFin" className="text-sm font-medium text-walnut">
-            Heure de fin
+            Fin d&apos;après-midi
           </label>
           <input
             id="heureFin"
@@ -187,8 +231,10 @@ export default function DisponibilitesSettings() {
       <p className="text-xs text-body">
         Les créneaux à venir sont générés automatiquement selon ces règles
         (sur ~4 mois glissants), en tenant compte des vacances définies
-        ci-dessous. Une fois le nombre maximal de RDV atteint sur une
-        journée, celle-ci n&apos;est plus proposée aux visiteurs du site.
+        ci-dessous. Une matinée ou un après-midi désactivé ne génère aucun
+        créneau sur ce créneau horaire, ce jour-là. Une fois le nombre
+        maximal de RDV atteint sur une journée, celle-ci n&apos;est plus
+        proposée aux visiteurs du site.
       </p>
     </form>
   );

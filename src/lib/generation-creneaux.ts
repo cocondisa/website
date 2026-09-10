@@ -18,32 +18,33 @@ function isoWeekdayOfDateKey(dateKey: string): number {
   return jsDay === 0 ? 7 : jsDay;
 }
 
-function estJourActif(dispo: Disponibilite, isoWeekday: number): boolean {
+function demiJourneesActives(dispo: Disponibilite, isoWeekday: number): { matin: boolean; apresMidi: boolean } {
   switch (isoWeekday) {
     case 1:
-      return dispo.lundi;
+      return { matin: dispo.lundiMatin, apresMidi: dispo.lundiApresMidi };
     case 2:
-      return dispo.mardi;
+      return { matin: dispo.mardiMatin, apresMidi: dispo.mardiApresMidi };
     case 3:
-      return dispo.mercredi;
+      return { matin: dispo.mercrediMatin, apresMidi: dispo.mercrediApresMidi };
     case 4:
-      return dispo.jeudi;
+      return { matin: dispo.jeudiMatin, apresMidi: dispo.jeudiApresMidi };
     case 5:
-      return dispo.vendredi;
+      return { matin: dispo.vendrediMatin, apresMidi: dispo.vendrediApresMidi };
     case 6:
-      return dispo.samedi;
+      return { matin: dispo.samediMatin, apresMidi: dispo.samediApresMidi };
     case 7:
-      return dispo.dimanche;
+      return { matin: dispo.dimancheMatin, apresMidi: dispo.dimancheApresMidi };
     default:
-      return false;
+      return { matin: false, apresMidi: false };
   }
 }
 
-function genererHeuresDuJour(heureDebut: string, heureFin: string, dureeMinutes: number): string[] {
-  const toMinutes = (t: string) => {
-    const [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-  };
+function toMinutes(t: string) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function genererHeuresEntre(heureDebut: string, heureFin: string, dureeMinutes: number): string[] {
   const debut = toMinutes(heureDebut);
   const fin = toMinutes(heureFin);
   const heures: string[] = [];
@@ -52,6 +53,18 @@ function genererHeuresDuJour(heureDebut: string, heureFin: string, dureeMinutes:
     const m = t % 60;
     heures.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
   }
+  return heures;
+}
+
+/** Heures de créneaux d'un jour donné, en ne générant que les demi-journées actives. */
+function genererHeuresDuJour(
+  dispo: Disponibilite,
+  isoWeekday: number
+): string[] {
+  const { matin, apresMidi } = demiJourneesActives(dispo, isoWeekday);
+  const heures: string[] = [];
+  if (matin) heures.push(...genererHeuresEntre(dispo.heureDebut, dispo.heureMidi, dispo.dureeCreneauMinutes));
+  if (apresMidi) heures.push(...genererHeuresEntre(dispo.heureMidi, dispo.heureFin, dispo.dureeCreneauMinutes));
   return heures;
 }
 
@@ -70,17 +83,13 @@ export async function regenererCreneauxAutomatiques() {
 
   const vacances = await prisma.vacances.findMany();
   const todayKey = toDateKeyInTimeZone(new Date());
-  const heuresDuJour = genererHeuresDuJour(
-    disponibilite.heureDebut,
-    disponibilite.heureFin,
-    disponibilite.dureeCreneauMinutes
-  );
 
   const creneauxValides = new Map<string, Date>();
 
   for (let i = 0; i < FENETRE_JOURS; i++) {
     const dateKey = dateKeyPlusDays(todayKey, i);
-    if (!estJourActif(disponibilite, isoWeekdayOfDateKey(dateKey))) continue;
+    const heuresDuJour = genererHeuresDuJour(disponibilite, isoWeekdayOfDateKey(dateKey));
+    if (heuresDuJour.length === 0) continue;
 
     const jourDebut = zonedTimeToUtc(dateKey, "00:00");
     const dansVacances = vacances.some((v) => jourDebut >= v.debut && jourDebut <= v.fin);

@@ -74,18 +74,28 @@ model Parametres {
 }
 
 // Ligne unique (id fixe "default") : disponibilités récurrentes d'Isabelle,
-// utilisées pour générer automatiquement les créneaux à venir.
+// utilisées pour générer automatiquement les créneaux à venir. Chaque jour
+// est scindé en matin/après-midi pour permettre des demi-journées off.
 model Disponibilite {
-  id                  String  @id @default("default")
-  lundi               Boolean @default(true)
-  mardi               Boolean @default(true)
-  mercredi            Boolean @default(true)
-  jeudi               Boolean @default(true)
-  vendredi            Boolean @default(true)
-  samedi              Boolean @default(false)
-  dimanche            Boolean @default(false)
-  heureDebut          String  @default("09:00") // format "HH:mm", heure de Paris
-  heureFin            String  @default("17:00")
-  dureeCreneauMinutes Int     @default(90)
-  maxRdvParJour       Int     @default(4)
+  id                String  @id @default("default")
+  lundiMatin        Boolean @default(true)
+  lundiApresMidi    Boolean @default(true)
+  mardiMatin        Boolean @default(true)
+  mardiApresMidi    Boolean @default(true)
+  mercrediMatin     Boolean @default(true)
+  mercrediApresMidi Boolean @default(true)
+  jeudiMatin        Boolean @default(true)
+  jeudiApresMidi    Boolean @default(true)
+  vendrediMatin     Boolean @default(true)
+  vendrediApresMidi Boolean @default(true)
+  samediMatin       Boolean @default(false)
+  samediApresMidi   Boolean @default(false)
+  dimancheMatin     Boolean @default(false)
+  dimancheApresMidi Boolean @default(false)
+
+  heureDebut          String @default("09:00") // format "HH:mm", heure de Paris
+  heureMidi           String @default("13:00") // fin de matinée / début d'après-midi
+  heureFin            String @default("17:00")
+  dureeCreneauMinutes Int    @default(90)
+  maxRdvParJour       Int    @default(4)
 }
