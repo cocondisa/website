@@ -10,6 +10,7 @@ type CreneauAdmin = {
   dureeMinutes: number;
   disponible: boolean;
   reservation: {
+    id: string;
     nomComplet: string;
     email: string;
     telephone: string;
@@ -116,6 +117,19 @@ export default function AdminDashboard() {
     reload();
   }
 
+  async function handleCancelReservation(reservationId: string) {
+    if (!confirm("Annuler cette réservation et libérer le créneau ?")) return;
+
+    const res = await fetch(`/api/admin/reservations/${reservationId}`, {
+      method: "PATCH",
+    });
+    if (!res.ok) {
+      alert("Impossible d'annuler cette réservation.");
+      return;
+    }
+    reload();
+  }
+
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
     router.push("/admin/login");
@@ -213,13 +227,23 @@ export default function AdminDashboard() {
                       {statut.label}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(creneau.id)}
-                    className="text-sm text-error underline underline-offset-4"
-                  >
-                    Supprimer
-                  </button>
+                  {creneau.reservation && creneau.reservation.statut !== "ANNULEE" ? (
+                    <button
+                      type="button"
+                      onClick={() => handleCancelReservation(creneau.reservation!.id)}
+                      className="text-sm text-error underline underline-offset-4"
+                    >
+                      Annuler la réservation
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(creneau.id)}
+                      className="text-sm text-error underline underline-offset-4"
+                    >
+                      Supprimer
+                    </button>
+                  )}
                 </div>
               </div>
             );

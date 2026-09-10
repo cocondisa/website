@@ -8,7 +8,7 @@ export async function GET() {
     orderBy: { date: "asc" },
     include: {
       reservation: {
-        select: { nomComplet: true, email: true, telephone: true, statut: true },
+        select: { id: true, nomComplet: true, email: true, telephone: true, statut: true },
       },
     },
   });
