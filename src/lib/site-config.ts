@@ -25,11 +25,11 @@ export const social = {
 };
 
 export const legal = {
-  raisonSociale: "[NOM / RAISON SOCIALE À COMPLÉTER]",
-  statut: "[STATUT JURIDIQUE À COMPLÉTER — ex. Micro-entrepreneur]",
-  siret: "[SIRET À COMPLÉTER]",
-  adresseSiege: "[ADRESSE DU SIÈGE À COMPLÉTER]",
-  directeurPublication: "[NOM DU RESPONSABLE DE PUBLICATION À COMPLÉTER]",
+  raisonSociale: "Isabelle Messal",
+  statut: "Auto-entrepreneuse",
+  siret: "898 887 229",
+  adresseSiege: "9 rue des Rossignols, 31170 Tournefeuille",
+  directeurPublication: "Isabelle Messal",
   hebergeur: {
     nom: "Vercel Inc.",
     adresse: "440 N Barranca Ave #4133, Covina, CA 91723, USA",
