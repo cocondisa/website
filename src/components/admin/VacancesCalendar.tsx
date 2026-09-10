@@ -10,6 +10,8 @@ type Periode = {
   label: string | null;
 };
 
+type ReservationDuJour = { id: string; nomComplet: string };
+
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
 const dayFormatter = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
 const joursSemaine = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
@@ -42,6 +44,9 @@ export default function VacancesCalendar() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [reservationsParJour, setReservationsParJour] = useState<
+    Map<string, ReservationDuJour[]>
+  >(new Map());
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +64,46 @@ export default function VacancesCalendar() {
       cancelled = true;
     };
   }, [refreshKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/admin/creneaux")
+      .then((res) => res.json())
+      .then((data: { creneaux: { id: string; date: string; reservation: { nomComplet: string; statut: string } | null }[] }) => {
+        if (cancelled) return;
+        const map = new Map<string, ReservationDuJour[]>();
+        for (const c of data.creneaux) {
+          if (!c.reservation || c.reservation.statut === "ANNULEE") continue;
+          const key = toDateKey(new Date(c.date));
+          const existing = map.get(key) ?? [];
+          existing.push({ id: c.id, nomComplet: c.reservation.nomComplet });
+          map.set(key, existing);
+        }
+        setReservationsParJour(map);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshKey]);
+
+  function handleReservationDotClick(event: React.MouseEvent, ids: string[]) {
+    event.stopPropagation();
+    ids.forEach((id, index) => {
+      const el = document.getElementById(`reservation-${id}`);
+      if (!el) return;
+      if (index === 0) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      el.style.transition = "background-color 1.2s ease";
+      el.style.backgroundColor = "#FFD6C0";
+      setTimeout(() => {
+        el.style.backgroundColor = "";
+      }, 1500);
+    });
+  }
 
   const today = startOfDay(new Date());
   const year = monthCursor.getFullYear();
@@ -195,18 +240,36 @@ export default function VacancesCalendar() {
             classes += " bg-parchment text-walnut hover:bg-peach/50 cursor-pointer";
           }
 
+          const key = toDateKey(day);
+          const reservationsDuJour = reservationsParJour.get(key);
+
           return (
-            <button
-              key={toDateKey(day)}
-              type="button"
-              disabled={isPast || Boolean(existing)}
-              onClick={() => handleDayClick(day)}
-              title={existing ? "Période bloquée" : undefined}
-              style={existing ? HACHURES_BLOQUEES : undefined}
-              className={classes}
-            >
-              {day.getDate()}
-            </button>
+            <div key={key} className="relative">
+              <button
+                type="button"
+                disabled={isPast || Boolean(existing)}
+                onClick={() => handleDayClick(day)}
+                title={existing ? "Période bloquée" : undefined}
+                style={existing ? HACHURES_BLOQUEES : undefined}
+                className={`w-full ${classes}`}
+              >
+                {day.getDate()}
+              </button>
+              {reservationsDuJour && reservationsDuJour.length > 0 && (
+                <button
+                  type="button"
+                  onClick={(event) =>
+                    handleReservationDotClick(
+                      event,
+                      reservationsDuJour.map((r) => r.id)
+                    )
+                  }
+                  aria-label={`${reservationsDuJour.length} rendez-vous le ${dayFormatter.format(day)} — voir le détail`}
+                  title={reservationsDuJour.map((r) => r.nomComplet).join(", ")}
+                  className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-accent ring-1 ring-white transition-transform hover:scale-125"
+                />
+              )}
+            </div>
           );
         })}
       </div>
@@ -216,8 +279,11 @@ export default function VacancesCalendar() {
           <span style={HACHURES_BLOQUEES} className="inline-block h-3 w-3 rounded-sm" />{" "}
           Période bloquée
         </span>
-        <span className="inline-flex items-center gap-1">
+        <span className="mr-2 inline-flex items-center gap-1">
           <span className="inline-block h-3 w-3 rounded-sm bg-accent" /> Sélection
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block h-2 w-2 rounded-full bg-accent" /> RDV ce jour
         </span>
       </p>
 

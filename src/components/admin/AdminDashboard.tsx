@@ -194,6 +194,7 @@ export default function AdminDashboard() {
             return (
               <div
                 key={creneau.id}
+                id={`reservation-${creneau.id}`}
                 className="flex flex-wrap items-center justify-between gap-3 px-6 py-4"
               >
                 <div>
