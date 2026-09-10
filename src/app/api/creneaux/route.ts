@@ -2,6 +2,21 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
+  try {
+    return await handleGet();
+  } catch (error) {
+    console.error("Erreur /api/creneaux :", error);
+    return NextResponse.json(
+      {
+        error: "DEBUG_TEMP",
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleGet() {
   // Libère les créneaux dont la retenue de paiement a expiré (client parti
   // sans finaliser son paiement Stripe) avant de renvoyer la liste.
   await prisma.reservation.updateMany({
