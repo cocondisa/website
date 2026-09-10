@@ -107,37 +107,37 @@ export default function CreneauxCalendar({
   const heuresDuJour = selectedDateKey ? creneauxParDate.get(selectedDateKey) ?? [] : [];
 
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-border bg-parchment p-5 sm:flex-row sm:gap-8 sm:p-6">
-      <div className="sm:w-[19rem] sm:shrink-0">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-parchment p-4 sm:flex-row sm:gap-6 sm:p-5">
+      <div className="mx-auto w-[80%] sm:mx-0 sm:w-[13.5rem] sm:shrink-0">
         <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={() => setMonthCursor(new Date(year, month - 1, 1))}
             aria-label="Mois précédent"
-            className="rounded-full px-3 py-1 text-walnut hover:bg-peach/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+            className="rounded-full px-2 py-0.5 text-sm text-walnut hover:bg-peach/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
           >
             ←
           </button>
-          <p className="text-sm font-semibold capitalize text-walnut">
+          <p className="text-xs font-semibold capitalize text-walnut">
             {monthFormatter.format(monthCursor)}
           </p>
           <button
             type="button"
             onClick={() => setMonthCursor(new Date(year, month + 1, 1))}
             aria-label="Mois suivant"
-            className="rounded-full px-3 py-1 text-walnut hover:bg-peach/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+            className="rounded-full px-2 py-0.5 text-sm text-walnut hover:bg-peach/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
           >
             →
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-body">
+        <div className="mt-3 grid grid-cols-7 gap-0.5 text-center text-[0.55rem] font-semibold uppercase tracking-wide text-body">
           {joursSemaine.map((j) => (
             <span key={j}>{j}</span>
           ))}
         </div>
 
-        <div className="mt-1 grid grid-cols-7 gap-1">
+        <div className="mt-1 grid grid-cols-7 gap-0.5">
           {days.map((day, index) => {
             if (!day) return <span key={`blank-${index}`} />;
 
@@ -148,7 +148,7 @@ export default function CreneauxCalendar({
             const disabled = isPast || !hasCreneaux;
 
             let classes =
-              "aspect-square rounded-full text-sm flex items-center justify-center transition-colors";
+              "aspect-square rounded-full text-xs flex items-center justify-center transition-colors";
 
             if (disabled) {
               classes += " text-body/30 cursor-default";
@@ -174,7 +174,7 @@ export default function CreneauxCalendar({
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-3 sm:border-l sm:border-border sm:pl-8">
+      <div className="flex min-w-0 flex-1 flex-col gap-3 sm:border-l sm:border-border sm:pl-6">
         {selectedDateKey && (
           <p className="text-sm font-semibold capitalize text-walnut">
             {dayHeaderFormatter.format(new Date(`${selectedDateKey}T00:00:00`))}

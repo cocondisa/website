@@ -21,13 +21,19 @@ enum StatutReservation {
   ANNULEE
 }
 
+enum OrigineCreneau {
+  AUTO // généré depuis les disponibilités récurrentes
+  MANUEL // ajouté à la main par Isabelle depuis l'admin
+}
+
 model Creneau {
-  id           String       @id @default(cuid())
+  id           String         @id @default(cuid())
   date         DateTime // date et heure de début du créneau
-  dureeMinutes Int          @default(60)
-  disponible   Boolean      @default(true)
+  dureeMinutes Int            @default(60)
+  disponible   Boolean        @default(true)
+  origine      OrigineCreneau @default(MANUEL)
   reservation  Reservation?
-  createdAt    DateTime     @default(now())
+  createdAt    DateTime       @default(now())
 
   @@index([date])
 }
@@ -65,4 +71,21 @@ model Parametres {
   id             String  @id @default("default")
   bandeauActif   Boolean @default(false)
   bandeauMessage String  @default("")
+}
+
+// Ligne unique (id fixe "default") : disponibilités récurrentes d'Isabelle,
+// utilisées pour générer automatiquement les créneaux à venir.
+model Disponibilite {
+  id                  String  @id @default("default")
+  lundi               Boolean @default(true)
+  mardi               Boolean @default(true)
+  mercredi            Boolean @default(true)
+  jeudi               Boolean @default(true)
+  vendredi            Boolean @default(true)
+  samedi              Boolean @default(false)
+  dimanche            Boolean @default(false)
+  heureDebut          String  @default("09:00") // format "HH:mm", heure de Paris
+  heureFin            String  @default("17:00")
+  dureeCreneauMinutes Int     @default(90)
+  maxRdvParJour       Int     @default(4)
 }

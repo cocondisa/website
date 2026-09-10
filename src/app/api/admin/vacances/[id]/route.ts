@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { regenererCreneauxAutomatiques } from "@/lib/generation-creneaux";
 
 export async function DELETE(
   _request: Request,
@@ -8,6 +9,7 @@ export async function DELETE(
   const { id } = await params;
 
   await prisma.vacances.delete({ where: { id } }).catch(() => null);
+  await regenererCreneauxAutomatiques();
 
   return NextResponse.json({ ok: true });
 }

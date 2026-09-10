@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { regenererCreneauxAutomatiques } from "@/lib/generation-creneaux";
 
 export async function GET() {
+  // Maintient la fenêtre glissante de créneaux AUTO à jour à chaque
+  // consultation de l'admin (pas besoin de tâche planifiée pour le MVP).
+  await regenererCreneauxAutomatiques();
+
   const creneaux = await prisma.creneau.findMany({
     where: { date: { gte: new Date() } },
     orderBy: { date: "asc" },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { regenererCreneauxAutomatiques } from "@/lib/generation-creneaux";
 
 export async function GET() {
   const vacances = await prisma.vacances.findMany({
@@ -35,6 +36,8 @@ export async function POST(request: Request) {
   const vacances = await prisma.vacances.create({
     data: { debut, fin, label: parsed.data.label || null },
   });
+
+  await regenererCreneauxAutomatiques();
 
   return NextResponse.json({ vacances }, { status: 201 });
 }

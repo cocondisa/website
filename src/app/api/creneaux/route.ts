@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { toDateKeyInTimeZone } from "@/lib/timezone";
 
 export async function GET() {
   // Libère les créneaux dont la retenue de paiement a expiré (client parti
@@ -36,5 +37,34 @@ export async function GET() {
     select: { id: true, date: true, dureeMinutes: true },
   });
 
-  return NextResponse.json({ creneaux });
+  // Une fois le nombre maximal de RDV/jour atteint (réservations confirmées
+  // ou en cours de paiement), le jour entier disparaît de la sélection,
+  // même s'il reste des créneaux techniquement libres ce jour-là.
+  const { maxRdvParJour } = await prisma.disponibilite.upsert({
+    where: { id: "default" },
+    update: {},
+    create: { id: "default" },
+    select: { maxRdvParJour: true },
+  });
+
+  const reservationsActives = await prisma.reservation.findMany({
+    where: {
+      statut: { in: ["CONFIRMEE", "EN_ATTENTE_PAIEMENT"] },
+      creneau: { date: { gte: new Date() } },
+    },
+    select: { creneau: { select: { date: true } } },
+  });
+
+  const compteParJour = new Map<string, number>();
+  for (const { creneau } of reservationsActives) {
+    const key = toDateKeyInTimeZone(creneau.date);
+    compteParJour.set(key, (compteParJour.get(key) ?? 0) + 1);
+  }
+
+  const creneauxDisponibles = creneaux.filter((c) => {
+    const jourComplet = (compteParJour.get(toDateKeyInTimeZone(c.date)) ?? 0) >= maxRdvParJour;
+    return !jourComplet;
+  });
+
+  return NextResponse.json({ creneaux: creneauxDisponibles });
 }

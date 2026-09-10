@@ -9,6 +9,7 @@ type CreneauAdmin = {
   date: string;
   dureeMinutes: number;
   disponible: boolean;
+  origine: "AUTO" | "MANUEL";
   reservation: {
     id: string;
     nomComplet: string;
@@ -139,7 +140,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex flex-col gap-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-walnut">Gestion des créneaux</h1>
+        <h1 className="text-2xl font-semibold text-walnut">Créneaux &amp; réservations</h1>
         <button
           type="button"
           onClick={handleLogout}
@@ -178,7 +179,7 @@ export default function AdminDashboard() {
           />
         </div>
         <Button type="submit" disabled={submitting}>
-          {submitting ? "Ajout…" : "Ajouter le créneau"}
+          {submitting ? "Ajout…" : "Ajouter un créneau exceptionnel"}
         </Button>
         {formError && (
           <p role="alert" className="w-full text-sm font-medium text-error">
@@ -194,7 +195,7 @@ export default function AdminDashboard() {
       ) : creneaux.length === 0 ? (
         <p className="text-sm text-body">Aucun créneau à venir. Ajoutez-en un ci-dessus.</p>
       ) : (
-        <div className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-white/60">
+        <div className="flex max-h-[32rem] flex-col divide-y divide-border overflow-y-auto rounded-2xl border border-border bg-white/60">
           {creneaux.map((creneau) => {
             const statut = creneau.reservation
               ? statutLabels[creneau.reservation.statut]
@@ -220,6 +221,11 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                  {creneau.origine === "MANUEL" && (
+                    <span className="rounded-full bg-sage/20 px-3 py-1 text-xs font-semibold text-sage">
+                      Exceptionnel
+                    </span>
+                  )}
                   {statut && (
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${statut.className}`}
