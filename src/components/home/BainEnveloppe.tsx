@@ -2,11 +2,13 @@ import Image from "next/image";
 import Container from "@/components/ui/Container";
 import SectionTitle from "@/components/ui/SectionTitle";
 import PlaceholderImage from "@/components/ui/PlaceholderImage";
+import DecorativeBlobs from "@/components/ui/DecorativeBlobs";
 import { bienfaits } from "@/lib/site-config";
 
 export default function BainEnveloppe() {
   return (
-    <section id="bain-enveloppe" className="bg-parchment py-16 sm:py-24">
+    <section id="bain-enveloppe" className="relative isolate overflow-hidden bg-parchment py-16 sm:py-24">
+      <DecorativeBlobs variant={2} />
       <Container className="flex flex-col gap-14">
         <SectionTitle
           eyebrow="Ma prestation"

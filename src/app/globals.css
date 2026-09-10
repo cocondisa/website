@@ -3,20 +3,23 @@
 @tailwind utilities;
 
 :root {
-  /* Palette "Cocon d'Isa" — voir charte graphique */
-  --color-parchment: #fdf8f3; /* Fond principal */
-  --color-peach: #ffd6c0; /* Fond secondaire */
-  --color-border: #edd9c9; /* Bordures / séparateurs */
-  --color-text: #7a5f4a; /* Texte courant */
-  --color-walnut: #412b0b; /* Texte fort / titres (Deep Walnut) */
-  --color-accent: #e8825f; /* Accent principal / CTA (Burnt Peach) */
-  --color-accent-hover: #d66f4a; /* Accent CTA hover */
-  --color-sage: #9caf88; /* Accent secondaire */
-  --color-success: #8fae87; /* Confirmation */
-  --color-error: #c4593f; /* Alerte */
+  /* Palette "Cocon d'Isa" — voir charte graphique.
+     Valeurs stockées en triplets RGB (et non en hex) pour que les
+     modificateurs d'opacité Tailwind (ex. bg-accent/25) puissent injecter
+     un canal alpha via rgb(var(--x) / <alpha-value>). */
+  --color-parchment: 253 248 243; /* #fdf8f3 — Fond principal */
+  --color-peach: 255 214 192; /* #ffd6c0 — Fond secondaire */
+  --color-border: 237 217 201; /* #edd9c9 — Bordures / séparateurs */
+  --color-text: 122 95 74; /* #7a5f4a — Texte courant */
+  --color-walnut: 65 43 11; /* #412b0b — Texte fort / titres (Deep Walnut) */
+  --color-accent: 232 130 95; /* #e8825f — Accent principal / CTA (Burnt Peach) */
+  --color-accent-hover: 214 111 74; /* #d66f4a — Accent CTA hover */
+  --color-sage: 156 175 136; /* #9caf88 — Accent secondaire */
+  --color-success: 143 174 135; /* #8fae87 — Confirmation */
+  --color-error: 196 89 63; /* #c4593f — Alerte */
 }
 
 body {
-  background-color: var(--color-parchment);
-  color: var(--color-text);
+  background-color: rgb(var(--color-parchment));
+  color: rgb(var(--color-text));
 }

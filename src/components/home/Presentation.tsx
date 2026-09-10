@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import CountUp from "@/components/ui/CountUp";
+import DecorativeBlobs from "@/components/ui/DecorativeBlobs";
 
 export default function Presentation() {
   return (
-    <section className="bg-peach/40">
+    <section className="relative isolate overflow-hidden bg-peach/40">
+      <DecorativeBlobs variant={1} />
       <Container className="grid grid-cols-1 items-center gap-10 py-16 lg:grid-cols-2 lg:py-24">
         <div className="flex justify-center lg:order-1">
           <div className="relative aspect-square w-64 overflow-hidden rounded-full ring-8 ring-parchment shadow-lg sm:w-80 lg:w-96">

@@ -1,5 +1,6 @@
 import Container from "@/components/ui/Container";
 import SectionTitle from "@/components/ui/SectionTitle";
+import DecorativeBlobs from "@/components/ui/DecorativeBlobs";
 import { temoignages } from "@/lib/site-config";
 
 function getInitials(nom: string) {
@@ -12,7 +13,8 @@ function getInitials(nom: string) {
 
 export default function Temoignages() {
   return (
-    <section className="bg-parchment py-16 sm:py-24">
+    <section className="relative isolate overflow-hidden bg-parchment py-16 sm:py-24">
+      <DecorativeBlobs variant={4} />
       <Container className="flex flex-col gap-10">
         <SectionTitle eyebrow="Avis" title="Ce qu'en disent les parents" />
 

@@ -1,9 +1,11 @@
 import { ButtonLink } from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
+import DecorativeBlobs from "@/components/ui/DecorativeBlobs";
 
 export default function CtaFinal() {
   return (
-    <section className="bg-accent py-16 sm:py-20">
+    <section className="relative isolate overflow-hidden bg-accent py-16 sm:py-20">
+      <DecorativeBlobs variant={5} />
       <Container className="flex flex-col items-center gap-6 text-center">
         <h2 className="max-w-2xl text-3xl font-semibold text-parchment sm:text-4xl">
           Offrez à votre bébé un moment de douceur inoubliable

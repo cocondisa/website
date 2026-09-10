@@ -3,13 +3,15 @@
 import { useState } from "react";
 import Container from "@/components/ui/Container";
 import SectionTitle from "@/components/ui/SectionTitle";
+import DecorativeBlobs from "@/components/ui/DecorativeBlobs";
 import { faq } from "@/lib/site-config";
 
 export default function Faq() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="bg-peach/40 py-16 sm:py-24">
+    <section className="relative isolate overflow-hidden bg-peach/40 py-16 sm:py-24">
+      <DecorativeBlobs variant={2} />
       <Container className="flex flex-col gap-10">
         <SectionTitle eyebrow="Questions fréquentes" title="Tout ce qu'il faut savoir" />
 

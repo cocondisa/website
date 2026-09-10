@@ -1,11 +1,13 @@
 import { ButtonLink } from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import SectionTitle from "@/components/ui/SectionTitle";
+import DecorativeBlobs from "@/components/ui/DecorativeBlobs";
 import { bainEnveloppe } from "@/lib/site-config";
 
 export default function Tarifs() {
   return (
-    <section id="tarifs" className="bg-peach/40 py-16 sm:py-24">
+    <section id="tarifs" className="relative isolate overflow-hidden bg-peach/40 py-16 sm:py-24">
+      <DecorativeBlobs variant={3} />
       <Container className="flex flex-col items-center gap-10">
         <SectionTitle eyebrow="Tarifs" title="Un tarif simple et transparent" />
 
