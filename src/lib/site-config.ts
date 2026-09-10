@@ -15,7 +15,7 @@ export const contact = {
   telephone: "06 25 95 74 04",
   telephoneHref: "tel:+33625957404",
   email: "contact@cocondisa.fr",
-  zone: "[ZONE GÉOGRAPHIQUE À COMPLÉTER — à domicile / en cabinet]",
+  zone: "À domicile",
   adresseCabinet: "Tournefeuille, 31170",
 };
 
