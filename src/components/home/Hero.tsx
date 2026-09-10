@@ -43,8 +43,8 @@ export default function Hero() {
       </div>
 
       {/* Desktop : texte et image côte à côte */}
-      <Container className="hidden items-center gap-10 py-16 lg:grid lg:grid-cols-2 lg:py-28">
-        <div className="flex flex-col gap-6">
+      <Container className="hidden items-start gap-10 py-16 lg:grid lg:grid-cols-2 lg:pb-16 lg:pt-8">
+        <div className="flex flex-col gap-6 lg:mt-12">
           <span className="text-sm font-semibold uppercase tracking-widest text-sage">
             Bien-être pour jeunes parents &amp; nouveau-nés
           </span>
@@ -66,7 +66,7 @@ export default function Hero() {
 
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[63%_37%_54%_46%/43%_37%_63%_57%]">
           <Image
-            src="/images/pendant-le-bain.jpeg"
+            src="/images/pendant-le-bain-hero.jpeg"
             alt="Parent tenant délicatement la tête de bébé pendant le bain enveloppé"
             fill
             priority
