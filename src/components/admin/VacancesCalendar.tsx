@@ -146,7 +146,7 @@ export default function VacancesCalendar() {
   }
 
   return (
-    <div className="mx-auto flex w-[90%] max-w-sm flex-col gap-5 rounded-2xl border border-border bg-white/60 p-5 sm:mx-0 sm:w-72">
+    <div className="mx-auto flex h-full w-[90%] flex-col gap-5 rounded-2xl border border-border bg-white/60 p-5 sm:mx-0 sm:w-full">
       <div className="flex items-center justify-between">
         <button
           type="button"

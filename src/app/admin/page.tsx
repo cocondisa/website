@@ -14,16 +14,18 @@ export default function AdminPage() {
   return (
     <section className="py-16">
       <Container className="flex flex-col gap-14">
-        <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold text-walnut">
-            Disponibilités récurrentes
-          </h2>
-          <DisponibilitesSettings />
-        </div>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-stretch">
+          <div className="flex h-full flex-col gap-4">
+            <h2 className="text-xl font-semibold text-walnut">
+              Disponibilités récurrentes
+            </h2>
+            <DisponibilitesSettings />
+          </div>
 
-        <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold text-walnut">Vacances &amp; jours off</h2>
-          <VacancesCalendar />
+          <div className="flex h-full flex-col gap-4">
+            <h2 className="text-xl font-semibold text-walnut">Vacances &amp; jours off</h2>
+            <VacancesCalendar />
+          </div>
         </div>
 
         <AdminDashboard />

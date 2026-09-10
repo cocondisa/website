@@ -104,7 +104,7 @@ export default function DisponibilitesSettings() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-6 rounded-2xl border border-border bg-white/60 p-6"
+      className="flex h-full flex-col gap-6 rounded-2xl border border-border bg-white/60 p-6"
     >
       <div>
         <p className="text-sm font-medium text-walnut">Jours et demi-journées travaillés</p>
@@ -157,18 +157,6 @@ export default function DisponibilitesSettings() {
             type="time"
             value={dispo.heureDebut}
             onChange={(e) => setDispo({ ...dispo, heureDebut: e.target.value })}
-            className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="heureMidi" className="text-sm font-medium text-walnut">
-            Milieu de journée
-          </label>
-          <input
-            id="heureMidi"
-            type="time"
-            value={dispo.heureMidi}
-            onChange={(e) => setDispo({ ...dispo, heureMidi: e.target.value })}
             className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
           />
         </div>
