@@ -96,7 +96,11 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <ButtonLink href="/rendez-vous" className="mt-3 w-full">
+            <ButtonLink
+              href="/rendez-vous"
+              className="mt-3 w-full"
+              onClick={() => setOpen(false)}
+            >
               Prendre rendez-vous
             </ButtonLink>
           </nav>
