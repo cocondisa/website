@@ -69,6 +69,7 @@ export async function POST(request: Request) {
         mode: "payment",
         line_items: [{ price: priceId, quantity: 1 }],
         customer_email: email,
+        allow_promotion_codes: true,
         expires_at: Math.floor((Date.now() + HOLD_DURATION_MS) / 1000),
         success_url: `${siteConfig.url}/rendez-vous/confirmation?reservation=${reservation.id}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${siteConfig.url}/rendez-vous`,
