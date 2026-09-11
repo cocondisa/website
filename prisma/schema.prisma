@@ -51,6 +51,19 @@ model Reservation {
   stripeSessionId String?           @unique
   expiresAt       DateTime? // retenue expirée = créneau libérable si le paiement n'a pas abouti
   createdAt       DateTime          @default(now())
+  facture         Facture?
+}
+
+// Facture générée automatiquement à la confirmation du paiement (une par
+// réservation). Le PDF est conservé en base pour l'archivage comptable
+// d'Isabelle, en plus d'être joint à ses e-mails de notification.
+model Facture {
+  id            String      @id @default(cuid())
+  numero        String      @unique // format "2026-0001", séquentiel par année
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  reservationId String      @unique
+  pdf           Bytes
+  createdAt     DateTime    @default(now())
 }
 
 // Périodes de vacances / jours off d'Isabelle : masquent automatiquement les
@@ -71,6 +84,13 @@ model Parametres {
   id             String  @id @default("default")
   bandeauActif   Boolean @default(false)
   bandeauMessage String  @default("")
+
+  // Compteur de numérotation des factures — remis à 1 chaque nouvelle année
+  // civile (numéro final du type "2026-0001"), incrémenté dans une
+  // transaction pour rester séquentiel sans trou même en cas de confirmations
+  // simultanées.
+  prochainNumeroFacture Int @default(1)
+  anneeNumeroFacture    Int @default(0)
 }
 
 // Ligne unique (id fixe "default") : disponibilités récurrentes d'Isabelle,

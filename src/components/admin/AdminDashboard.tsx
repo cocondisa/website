@@ -15,6 +15,7 @@ type CreneauAdmin = {
     email: string;
     telephone: string;
     statut: "EN_ATTENTE_PAIEMENT" | "CONFIRMEE" | "ANNULEE";
+    facture: { id: string } | null;
   } | null;
 };
 
@@ -223,6 +224,14 @@ export default function AdminDashboard() {
                     >
                       {statut.label}
                     </span>
+                  )}
+                  {creneau.reservation?.facture && (
+                    <a
+                      href={`/api/admin/factures/${creneau.reservation.id}`}
+                      className="text-sm text-walnut underline underline-offset-4"
+                    >
+                      Télécharger la facture
+                    </a>
                   )}
                   {creneau.reservation && creneau.reservation.statut !== "ANNULEE" ? (
                     <button

@@ -8,6 +8,7 @@ import {
   notificationEmail,
   resend,
 } from "@/lib/resend";
+import { genererFacturePdf, genererNumeroFacture } from "@/lib/facture";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
@@ -23,7 +24,7 @@ const heureFormatter = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
 });
 
-async function confirmReservation(reservationId: string) {
+async function confirmReservation(reservationId: string, montantTotalCentimes: number | null) {
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
     include: { creneau: true },
@@ -31,19 +32,48 @@ async function confirmReservation(reservationId: string) {
 
   if (!reservation || reservation.statut === "CONFIRMEE") return;
 
-  await prisma.reservation.update({
-    where: { id: reservationId },
-    data: { statut: "CONFIRMEE" },
+  // Le montant réellement payé (après code promo éventuel) vient de la
+  // session Stripe ; à défaut on retombe sur le tarif plein configuré.
+  const montantCentimes = montantTotalCentimes ?? 15000;
+
+  const numero = await prisma.$transaction(async (tx) => {
+    await tx.reservation.update({
+      where: { id: reservationId },
+      data: { statut: "CONFIRMEE" },
+    });
+    return genererNumeroFacture(tx);
+  });
+
+  const facturePdf = await genererFacturePdf({
+    numero,
+    nomClient: reservation.nomComplet,
+    emailClient: reservation.email,
+    datePrestation: reservation.creneau.date,
+    montantCentimes,
+  });
+
+  await prisma.facture.create({
+    data: {
+      numero,
+      reservationId,
+      pdf: Buffer.from(facturePdf),
+    },
   });
 
   const dateFormatee = dateFormatter.format(reservation.creneau.date);
   const heureFormatee = heureFormatter.format(reservation.creneau.date);
   const notificationRecipient = process.env.NOTIFICATION_EMAIL;
+  const factureAttachment = {
+    filename: `facture-${numero}.pdf`,
+    content: Buffer.from(facturePdf),
+    content_type: "application/pdf",
+  };
 
   await Promise.allSettled([
     resend.emails.send({
       from: EMAIL_FROM,
       to: reservation.email,
+      attachments: [factureAttachment],
       ...clientConfirmationEmail({
         nomComplet: reservation.nomComplet,
         dateFormatee,
@@ -54,6 +84,7 @@ async function confirmReservation(reservationId: string) {
       ? resend.emails.send({
           from: EMAIL_FROM,
           to: notificationRecipient,
+          attachments: [factureAttachment],
           ...notificationEmail({
             nomComplet: reservation.nomComplet,
             email: reservation.email,
@@ -108,7 +139,7 @@ export async function POST(request: Request) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       const reservationId = session.metadata?.reservationId;
-      if (reservationId) await confirmReservation(reservationId);
+      if (reservationId) await confirmReservation(reservationId, session.amount_total);
       break;
     }
     case "checkout.session.expired": {

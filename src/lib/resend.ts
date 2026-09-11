@@ -90,6 +90,9 @@ export function clientConfirmationEmail({
         rechange pour bébé.
       </p>
     </div>
+    <p style="margin: 20px 0 0; font-size: 13px; color: #7A5F4A;">
+      Votre facture est jointe à cet e-mail au format PDF.
+    </p>
   `;
 
   return {
