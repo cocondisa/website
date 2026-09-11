@@ -21,14 +21,14 @@ export default function Hero() {
           aria-hidden="true"
           className="absolute inset-0 bg-gradient-to-t from-walnut from-10% via-walnut/85 via-55% to-walnut/10"
         />
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 px-4 pb-10 pt-20 sm:px-6">
+        <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 px-4 pb-10 pt-20 text-center sm:px-6">
           <span className="text-sm font-semibold uppercase tracking-widest text-peach">
             Bien-être pour jeunes parents &amp; nouveau-nés
           </span>
           <h1 className="text-4xl font-bold leading-tight text-parchment sm:text-5xl">
             Bain enveloppé pour nouveau‑nés
           </h1>
-          <p className="text-sm font-medium text-peach">
+          <p className="text-base font-medium text-peach">
             📍 À Tournefeuille (31)
           </p>
           <p className="max-w-md text-base text-parchment">

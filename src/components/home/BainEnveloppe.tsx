@@ -18,34 +18,55 @@ export default function BainEnveloppe() {
 
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-4">
-            <h3 className="text-2xl font-semibold text-walnut">
-              Qu&apos;est-ce que le bain enveloppé ?
-            </h3>
-            <p className="text-base text-body">
-              Le bain enveloppé est une technique de bain doux pour le
-              nouveau-né : bébé reste enveloppé dans un lange pendant son
-              immersion dans l&apos;eau chaude, recréant la sensation
-              contenante du ventre maternel. Cette approche limite le réflexe
-              de sursaut souvent provoqué par le bain traditionnel et permet
-              un moment beaucoup plus apaisé, pour bébé comme pour ses
-              parents.
-            </p>
-            <h3 className="mt-2 text-2xl font-semibold text-walnut">
-              Comment se déroule la séance ?
-            </h3>
-            <p className="text-base text-body">
-              Vous êtes accueillis avec votre bébé dans une pièce de détente
-              snoezelen, où nous échangeons en toute sérénité sur votre vécu
-              de la grossesse et de l&apos;accouchement. Direction ensuite une
-              pièce dédiée, où j&apos;ai préalablement installé tout le
-              matériel nécessaire : je vous guide alors en douceur pour
-              réaliser ensemble le bain enveloppé. La séance se termine par
-              la transmission des gestes d&apos;un massage de réflexologie
-              plantaire pour bébé.
-            </p>
+            <div className="flex flex-col gap-3 rounded-2xl border border-border bg-white/60 p-6">
+              <div className="flex items-center gap-3">
+                <span
+                  aria-hidden="true"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-peach/50 text-lg text-sage"
+                >
+                  ✦
+                </span>
+                <h3 className="text-xl font-semibold text-walnut">
+                  Qu&apos;est-ce que le bain enveloppé ?
+                </h3>
+              </div>
+              <p className="text-base text-body">
+                Le bain enveloppé est une technique de bain doux pour le
+                nouveau-né : bébé reste enveloppé dans un lange pendant son
+                immersion dans l&apos;eau chaude, recréant la sensation
+                contenante du ventre maternel. Cette approche limite le
+                réflexe de sursaut souvent provoqué par le bain traditionnel
+                et permet un moment beaucoup plus apaisé, pour bébé comme
+                pour ses parents.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 rounded-2xl border border-border bg-white/60 p-6">
+              <div className="flex items-center gap-3">
+                <span
+                  aria-hidden="true"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-peach/50 text-lg text-sage"
+                >
+                  ✦
+                </span>
+                <h3 className="text-xl font-semibold text-walnut">
+                  Comment se déroule la séance ?
+                </h3>
+              </div>
+              <p className="text-base text-body">
+                Vous êtes accueillis avec votre bébé dans une pièce de
+                détente snoezelen, où nous échangeons en toute sérénité sur
+                votre vécu de la grossesse et de l&apos;accouchement.
+                Direction ensuite une pièce dédiée, où j&apos;ai
+                préalablement installé tout le matériel nécessaire : je vous
+                guide alors en douceur pour réaliser ensemble le bain
+                enveloppé. La séance se termine par la transmission des
+                gestes d&apos;un massage de réflexologie plantaire pour bébé.
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="order-first grid grid-cols-2 gap-4 lg:order-none">
             <PlaceholderImage label="[PHOTO — préparation du bain]" className="aspect-square" />
             <div className="relative aspect-square overflow-hidden rounded-2xl border border-border">
               <Image
