@@ -32,10 +32,14 @@ model Creneau {
   dureeMinutes Int            @default(60)
   disponible   Boolean        @default(true)
   origine      OrigineCreneau @default(MANUEL)
+  // Référence un id de src/lib/prestations.ts (pas de FK — le catalogue est
+  // figé dans le code, pas géré en base).
+  prestationId String         @default("bain-enveloppe")
   reservation  Reservation?
   createdAt    DateTime       @default(now())
 
   @@index([date])
+  @@index([prestationId, date])
 }
 
 model Reservation {
@@ -93,11 +97,15 @@ model Parametres {
   anneeNumeroFacture    Int @default(0)
 }
 
-// Ligne unique (id fixe "default") : disponibilités récurrentes d'Isabelle,
-// utilisées pour générer automatiquement les créneaux à venir. Chaque jour
-// est scindé en matin/après-midi pour permettre des demi-journées off.
+// Disponibilités récurrentes d'Isabelle, utilisées pour générer
+// automatiquement les créneaux à venir — une ligne par prestation (id = un
+// identifiant de src/lib/prestations.ts), chacune avec son propre planning.
+// Chaque jour est scindé en matin/après-midi pour permettre des demi-journées
+// off ; pour la prestation nocturne (garde de nuit), seul le champ
+// `*ApresMidi` est utilisé par jour (comme bascule "nuit disponible"), le
+// champ `*Matin` correspondant est ignoré.
 model Disponibilite {
-  id                String  @id @default("default")
+  id                String  @id
   lundiMatin        Boolean @default(true)
   lundiApresMidi    Boolean @default(true)
   mardiMatin        Boolean @default(true)
@@ -113,9 +121,8 @@ model Disponibilite {
   dimancheMatin     Boolean @default(false)
   dimancheApresMidi Boolean @default(false)
 
-  heureDebut          String @default("09:00") // format "HH:mm", heure de Paris
-  heureMidi           String @default("13:00") // fin de matinée / début d'après-midi
-  heureFin            String @default("17:00")
-  dureeCreneauMinutes Int    @default(90)
-  maxRdvParJour       Int    @default(4)
+  heureDebut    String @default("09:00") // format "HH:mm", heure de Paris
+  heureMidi     String @default("13:00") // fin de matinée / début d'après-midi
+  heureFin      String @default("17:00") // pour une prestation nocturne, peut être < heureDebut (passage minuit)
+  maxRdvParJour Int    @default(4)
 }

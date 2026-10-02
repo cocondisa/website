@@ -1,6 +1,7 @@
 import type { Disponibilite } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { zonedTimeToUtc, toDateKeyInTimeZone } from "@/lib/timezone";
+import { prestationsList, type Prestation } from "@/lib/prestations";
 
 const FENETRE_JOURS = 120; // horizon glissant de génération (~4 mois)
 
@@ -56,80 +57,99 @@ function genererHeuresEntre(heureDebut: string, heureFin: string, dureeMinutes: 
   return heures;
 }
 
-/** Heures de créneaux d'un jour donné, en ne générant que les demi-journées actives. */
-function genererHeuresDuJour(
-  dispo: Disponibilite,
-  isoWeekday: number
-): string[] {
+/**
+ * Heures de créneaux d'un jour donné pour une prestation, en ne générant que
+ * les demi-journées actives. Pour une prestation nocturne (ex. garde de
+ * nuit), le créneau unique du jour démarre à `heureDebut` et traverse minuit
+ * (sa durée vient entièrement de la prestation, pas d'un découpage en
+ * sous-créneaux) ; seule la bascule `*ApresMidi` du jour sert alors
+ * d'indicateur "nuit disponible", `*Matin` n'est pas utilisé.
+ */
+function genererHeuresDuJour(dispo: Disponibilite, prestation: Prestation, isoWeekday: number): string[] {
   const { matin, apresMidi } = demiJourneesActives(dispo, isoWeekday);
+
+  if (prestation.nocturne) {
+    return apresMidi ? [dispo.heureDebut] : [];
+  }
+
   const heures: string[] = [];
-  if (matin) heures.push(...genererHeuresEntre(dispo.heureDebut, dispo.heureMidi, dispo.dureeCreneauMinutes));
-  if (apresMidi) heures.push(...genererHeuresEntre(dispo.heureMidi, dispo.heureFin, dispo.dureeCreneauMinutes));
+  if (matin) heures.push(...genererHeuresEntre(dispo.heureDebut, dispo.heureMidi, prestation.dureeMinutes));
+  if (apresMidi) heures.push(...genererHeuresEntre(dispo.heureMidi, dispo.heureFin, prestation.dureeMinutes));
   return heures;
 }
 
 /**
- * Régénère les créneaux AUTO à venir à partir des disponibilités
- * récurrentes : crée ceux qui manquent, supprime ceux qui ne correspondent
- * plus à la règle actuelle (uniquement s'ils ne sont pas réservés). Les
- * créneaux ajoutés manuellement, passés, ou réservés ne sont jamais touchés.
+ * Régénère les créneaux AUTO à venir, pour chaque prestation, à partir de
+ * ses disponibilités récurrentes propres : crée ceux qui manquent, supprime
+ * ceux qui ne correspondent plus à la règle actuelle (uniquement s'ils ne
+ * sont pas réservés). Les créneaux ajoutés manuellement, passés, ou réservés
+ * ne sont jamais touchés.
  */
 export async function regenererCreneauxAutomatiques() {
-  const disponibilite = await prisma.disponibilite.upsert({
-    where: { id: "default" },
-    update: {},
-    create: { id: "default" },
-  });
-
   const vacances = await prisma.vacances.findMany();
   const todayKey = toDateKeyInTimeZone(new Date());
 
-  const creneauxValides = new Map<string, Date>();
+  let totalCrees = 0;
+  let totalSupprimes = 0;
 
-  for (let i = 0; i < FENETRE_JOURS; i++) {
-    const dateKey = dateKeyPlusDays(todayKey, i);
-    const heuresDuJour = genererHeuresDuJour(disponibilite, isoWeekdayOfDateKey(dateKey));
-    if (heuresDuJour.length === 0) continue;
-
-    const jourDebut = zonedTimeToUtc(dateKey, "00:00");
-    const dansVacances = vacances.some((v) => jourDebut >= v.debut && jourDebut <= v.fin);
-    if (dansVacances) continue;
-
-    for (const heure of heuresDuJour) {
-      const instant = zonedTimeToUtc(dateKey, heure);
-      creneauxValides.set(instant.toISOString(), instant);
-    }
-  }
-
-  const creneauxAutoExistants = await prisma.creneau.findMany({
-    where: { origine: "AUTO", date: { gte: new Date() } },
-    include: { reservation: true },
-  });
-  const instantsExistants = new Set(creneauxAutoExistants.map((c) => c.date.toISOString()));
-
-  const aSupprimer = creneauxAutoExistants.filter(
-    (c) =>
-      !creneauxValides.has(c.date.toISOString()) &&
-      (!c.reservation || c.reservation.statut === "ANNULEE")
-  );
-  if (aSupprimer.length > 0) {
-    const ids = aSupprimer.map((c) => c.id);
-    await prisma.$transaction([
-      prisma.reservation.deleteMany({ where: { creneauId: { in: ids } } }),
-      prisma.creneau.deleteMany({ where: { id: { in: ids } } }),
-    ]);
-  }
-
-  const aCreer = [...creneauxValides.entries()].filter(([iso]) => !instantsExistants.has(iso));
-  if (aCreer.length > 0) {
-    await prisma.creneau.createMany({
-      data: aCreer.map(([, date]) => ({
-        date,
-        dureeMinutes: disponibilite.dureeCreneauMinutes,
-        origine: "AUTO" as const,
-      })),
+  for (const prestation of prestationsList) {
+    const disponibilite = await prisma.disponibilite.upsert({
+      where: { id: prestation.id },
+      update: {},
+      create: { id: prestation.id },
     });
+
+    const creneauxValides = new Map<string, Date>();
+
+    for (let i = 0; i < FENETRE_JOURS; i++) {
+      const dateKey = dateKeyPlusDays(todayKey, i);
+      const heuresDuJour = genererHeuresDuJour(disponibilite, prestation, isoWeekdayOfDateKey(dateKey));
+      if (heuresDuJour.length === 0) continue;
+
+      const jourDebut = zonedTimeToUtc(dateKey, "00:00");
+      const dansVacances = vacances.some((v) => jourDebut >= v.debut && jourDebut <= v.fin);
+      if (dansVacances) continue;
+
+      for (const heure of heuresDuJour) {
+        const instant = zonedTimeToUtc(dateKey, heure);
+        creneauxValides.set(instant.toISOString(), instant);
+      }
+    }
+
+    const creneauxAutoExistants = await prisma.creneau.findMany({
+      where: { origine: "AUTO", prestationId: prestation.id, date: { gte: new Date() } },
+      include: { reservation: true },
+    });
+    const instantsExistants = new Set(creneauxAutoExistants.map((c) => c.date.toISOString()));
+
+    const aSupprimer = creneauxAutoExistants.filter(
+      (c) =>
+        !creneauxValides.has(c.date.toISOString()) &&
+        (!c.reservation || c.reservation.statut === "ANNULEE")
+    );
+    if (aSupprimer.length > 0) {
+      const ids = aSupprimer.map((c) => c.id);
+      await prisma.$transaction([
+        prisma.reservation.deleteMany({ where: { creneauId: { in: ids } } }),
+        prisma.creneau.deleteMany({ where: { id: { in: ids } } }),
+      ]);
+    }
+
+    const aCreer = [...creneauxValides.entries()].filter(([iso]) => !instantsExistants.has(iso));
+    if (aCreer.length > 0) {
+      await prisma.creneau.createMany({
+        data: aCreer.map(([, date]) => ({
+          date,
+          dureeMinutes: prestation.dureeMinutes,
+          prestationId: prestation.id,
+          origine: "AUTO" as const,
+        })),
+      });
+    }
+
+    totalCrees += aCreer.length;
+    totalSupprimes += aSupprimer.length;
   }
 
-  return { crees: aCreer.length, supprimes: aSupprimer.length };
+  return { crees: totalCrees, supprimes: totalSupprimes };
 }

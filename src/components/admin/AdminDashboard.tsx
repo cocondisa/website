@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
+import { prestations, prestationsList, type PrestationId } from "@/lib/prestations";
 
 type CreneauAdmin = {
   id: string;
@@ -9,6 +10,7 @@ type CreneauAdmin = {
   dureeMinutes: number;
   disponible: boolean;
   origine: "AUTO" | "MANUEL";
+  prestationId: string;
   reservation: {
     id: string;
     nomComplet: string;
@@ -75,6 +77,7 @@ export default function AdminDashboard() {
     const formData = new FormData(form);
     const jour = String(formData.get("jour") ?? "");
     const heure = String(formData.get("heure") ?? "");
+    const serviceId = String(formData.get("serviceId") ?? prestationsList[0].id);
 
     if (!jour || !heure) {
       setFormError("Merci de renseigner une date et une heure.");
@@ -88,7 +91,7 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/creneaux", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: date.toISOString(), dureeMinutes: 90 }),
+        body: JSON.stringify({ date: date.toISOString(), serviceId }),
       });
 
       if (!res.ok) {
@@ -146,6 +149,23 @@ export default function AdminDashboard() {
         className="flex flex-wrap items-end gap-4 rounded-2xl border border-border bg-white/60 p-6"
       >
         <div className="flex flex-col gap-1.5">
+          <label htmlFor="serviceId" className="text-sm font-medium text-walnut">
+            Prestation
+          </label>
+          <select
+            id="serviceId"
+            name="serviceId"
+            defaultValue={prestationsList[0].id}
+            className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
+          >
+            {prestationsList.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nom}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1.5">
           <label htmlFor="jour" className="text-sm font-medium text-walnut">
             Date
           </label>
@@ -201,6 +221,9 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm font-semibold capitalize text-walnut">
                     {dateTimeFormatter.format(new Date(creneau.date))}
+                  </p>
+                  <p className="text-xs font-medium text-accent">
+                    {prestations[creneau.prestationId as PrestationId]?.nom ?? creneau.prestationId}
                   </p>
                   {creneau.reservation ? (
                     <p className="text-xs text-body">

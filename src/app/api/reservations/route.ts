@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { siteConfig } from "@/lib/site-config";
+import { prestations, type PrestationId } from "@/lib/prestations";
 
 const reservationSchema = z.object({
   creneauId: z.string().min(1, "Créneau invalide."),
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   try {
     const expiresAt = new Date(Date.now() + HOLD_DURATION_MS);
 
-    const reservation = await prisma.$transaction(async (tx) => {
+    const { reservation, prestationId } = await prisma.$transaction(async (tx) => {
       const found = await tx.creneau.findUnique({ where: { id: creneauId } });
 
       if (!found || !found.disponible) {
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
         data: { disponible: false },
       });
 
-      return tx.reservation.create({
+      const created = await tx.reservation.create({
         data: {
           creneauId,
           nomComplet,
@@ -57,17 +58,28 @@ export async function POST(request: Request) {
           expiresAt,
         },
       });
+
+      return { reservation: created, prestationId: found.prestationId as PrestationId };
     });
 
     try {
-      const priceId = process.env.STRIPE_PRICE_ID;
-      if (!priceId) {
-        throw new Error("STRIPE_PRICE_ID_MANQUANT");
+      const prestation = prestations[prestationId];
+      if (!prestation) {
+        throw new Error("PRESTATION_INCONNUE");
       }
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        line_items: [{ price: priceId, quantity: 1 }],
+        line_items: [
+          {
+            price_data: {
+              currency: "eur",
+              unit_amount: prestation.prixCentimes,
+              product_data: { name: prestation.nom },
+            },
+            quantity: 1,
+          },
+        ],
         customer_email: email,
         allow_promotion_codes: true,
         expires_at: Math.floor((Date.now() + HOLD_DURATION_MS) / 1000),

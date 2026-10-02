@@ -9,6 +9,7 @@ import {
   resend,
 } from "@/lib/resend";
 import { genererFacturePdf, genererNumeroFacture } from "@/lib/facture";
+import { prestations, type PrestationId } from "@/lib/prestations";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
@@ -32,9 +33,11 @@ async function confirmReservation(reservationId: string, montantTotalCentimes: n
 
   if (!reservation || reservation.statut === "CONFIRMEE") return;
 
+  const prestation = prestations[reservation.creneau.prestationId as PrestationId];
+
   // Le montant réellement payé (après code promo éventuel) vient de la
   // session Stripe ; à défaut on retombe sur le tarif plein configuré.
-  const montantCentimes = montantTotalCentimes ?? 15000;
+  const montantCentimes = montantTotalCentimes ?? prestation.prixCentimes;
 
   const numero = await prisma.$transaction(async (tx) => {
     await tx.reservation.update({
@@ -50,6 +53,7 @@ async function confirmReservation(reservationId: string, montantTotalCentimes: n
     emailClient: reservation.email,
     datePrestation: reservation.creneau.date,
     montantCentimes,
+    nomPrestation: prestation.nom,
   });
 
   await prisma.facture.create({
@@ -76,8 +80,10 @@ async function confirmReservation(reservationId: string, montantTotalCentimes: n
       attachments: [factureAttachment],
       ...clientConfirmationEmail({
         nomComplet: reservation.nomComplet,
+        nomPrestation: prestation.nom,
         dateFormatee,
         heureFormatee,
+        afficherPreparationBain: prestation.id === "bain-enveloppe",
       }),
     }),
     notificationRecipient
@@ -87,6 +93,7 @@ async function confirmReservation(reservationId: string, montantTotalCentimes: n
           attachments: [factureAttachment],
           ...notificationEmail({
             nomComplet: reservation.nomComplet,
+            nomPrestation: prestation.nom,
             email: reservation.email,
             telephone: reservation.telephone,
             infosBebe: reservation.infosBebe,

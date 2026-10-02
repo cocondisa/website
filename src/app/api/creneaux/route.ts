@@ -1,8 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toDateKeyInTimeZone } from "@/lib/timezone";
+import { isPrestationId } from "@/lib/prestations";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const serviceId = request.nextUrl.searchParams.get("serviceId");
+
+  if (!serviceId || !isPrestationId(serviceId)) {
+    return NextResponse.json({ error: "Prestation invalide." }, { status: 400 });
+  }
+
   // Libère les créneaux dont la retenue de paiement a expiré (client parti
   // sans finaliser son paiement Stripe) avant de renvoyer la liste.
   await prisma.reservation.updateMany({
@@ -27,6 +34,7 @@ export async function GET() {
 
   const creneaux = await prisma.creneau.findMany({
     where: {
+      prestationId: serviceId,
       disponible: true,
       date: { gte: new Date() },
       // Exclut les créneaux qui tombent dans une période de vacances,
@@ -37,20 +45,21 @@ export async function GET() {
     select: { id: true, date: true, dureeMinutes: true },
   });
 
-  // Une fois le nombre maximal de RDV/jour atteint (réservations confirmées
-  // ou en cours de paiement), le jour entier disparaît de la sélection,
-  // même s'il reste des créneaux techniquement libres ce jour-là.
+  // Une fois le nombre maximal de RDV/jour atteint pour cette prestation
+  // (réservations confirmées ou en cours de paiement), le jour entier
+  // disparaît de la sélection, même s'il reste des créneaux techniquement
+  // libres ce jour-là.
   const { maxRdvParJour } = await prisma.disponibilite.upsert({
-    where: { id: "default" },
+    where: { id: serviceId },
     update: {},
-    create: { id: "default" },
+    create: { id: serviceId },
     select: { maxRdvParJour: true },
   });
 
   const reservationsActives = await prisma.reservation.findMany({
     where: {
       statut: { in: ["CONFIRMEE", "EN_ATTENTE_PAIEMENT"] },
-      creneau: { date: { gte: new Date() } },
+      creneau: { prestationId: serviceId, date: { gte: new Date() } },
     },
     select: { creneau: { select: { date: true } } },
   });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { regenererCreneauxAutomatiques } from "@/lib/generation-creneaux";
+import { isPrestationId, prestations } from "@/lib/prestations";
 
 export async function GET() {
   // Maintient la fenêtre glissante de créneaux AUTO à jour à chaque
@@ -18,7 +19,13 @@ export async function GET() {
       OR: [{ reservation: { isNot: null } }, { origine: "MANUEL" }],
     },
     orderBy: { date: "asc" },
-    include: {
+    select: {
+      id: true,
+      date: true,
+      dureeMinutes: true,
+      disponible: true,
+      origine: true,
+      prestationId: true,
       reservation: {
         select: {
           id: true,
@@ -37,14 +44,14 @@ export async function GET() {
 
 const creneauSchema = z.object({
   date: z.string().datetime({ offset: true }).or(z.string().min(1)),
-  dureeMinutes: z.number().int().positive().optional(),
+  serviceId: z.string().min(1),
 });
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = creneauSchema.safeParse(body);
 
-  if (!parsed.success) {
+  if (!parsed.success || !isPrestationId(parsed.data.serviceId)) {
     return NextResponse.json({ error: "Créneau invalide." }, { status: 400 });
   }
 
@@ -53,10 +60,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Date invalide." }, { status: 400 });
   }
 
+  const prestation = prestations[parsed.data.serviceId];
+
   const creneau = await prisma.creneau.create({
     data: {
       date,
-      dureeMinutes: parsed.data.dureeMinutes ?? 90,
+      dureeMinutes: prestation.dureeMinutes,
+      prestationId: prestation.id,
     },
   });
 

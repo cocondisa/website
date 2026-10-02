@@ -1,6 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { Prisma } from "@prisma/client";
-import { legal, siteConfig, bainEnveloppe } from "@/lib/site-config";
+import { legal, siteConfig } from "@/lib/site-config";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -44,12 +44,14 @@ export async function genererFacturePdf({
   emailClient,
   datePrestation,
   montantCentimes,
+  nomPrestation,
 }: {
   numero: string;
   nomClient: string;
   emailClient: string;
   datePrestation: Date;
   montantCentimes: number;
+  nomPrestation: string;
 }): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const page = doc.addPage([595.28, 841.89]); // A4
@@ -119,7 +121,7 @@ export async function genererFacturePdf({
   });
   y -= 18;
 
-  line(bainEnveloppe.nom, { size: 10, x: colDescription });
+  line(nomPrestation, { size: 10, x: colDescription });
   line(dateFormatter.format(datePrestation), { size: 10, x: colDate });
   line(`${montantEuros} €`, { size: 10, x: colMontant });
   y -= 30;

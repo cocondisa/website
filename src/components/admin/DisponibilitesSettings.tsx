@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
+import { prestationsList, type PrestationId } from "@/lib/prestations";
 
 type Disponibilite = {
   lundiMatin: boolean;
@@ -21,7 +22,6 @@ type Disponibilite = {
   heureDebut: string;
   heureMidi: string;
   heureFin: string;
-  dureeCreneauMinutes: number;
   maxRdvParJour: number;
 };
 
@@ -35,16 +35,53 @@ const jours: { prefix: string; label: string }[] = [
   { prefix: "dimanche", label: "Dimanche" },
 ];
 
+function ajouterMinutes(heure: string, minutes: number): string {
+  const [h, m] = heure.split(":").map(Number);
+  const total = ((h * 60 + m + minutes) % (24 * 60) + 24 * 60) % (24 * 60);
+  const hh = Math.floor(total / 60);
+  const mm = total % 60;
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
+
 export default function DisponibilitesSettings() {
+  const [serviceId, setServiceId] = useState<PrestationId>(prestationsList[0].id);
+
+  return (
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex flex-wrap gap-1.5 rounded-full border border-border bg-white/60 p-1">
+        {prestationsList.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => setServiceId(p.id)}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              p.id === serviceId
+                ? "bg-accent text-parchment"
+                : "text-walnut/70 hover:bg-peach/40"
+            }`}
+          >
+            {p.nom}
+          </button>
+        ))}
+      </div>
+
+      <DisponibiliteForm key={serviceId} serviceId={serviceId} />
+    </div>
+  );
+}
+
+function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
   const [dispo, setDispo] = useState<Disponibilite | null>(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const prestation = prestationsList.find((p) => p.id === serviceId)!;
+
   useEffect(() => {
     let cancelled = false;
 
-    fetch("/api/admin/disponibilites")
+    fetch(`/api/admin/disponibilites?serviceId=${serviceId}`)
       .then((res) => res.json())
       .then((data) => {
         if (!cancelled) setDispo(data.disponibilite);
@@ -56,7 +93,7 @@ export default function DisponibilitesSettings() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [serviceId]);
 
   function toggle(cle: string) {
     setDispo((prev) =>
@@ -71,11 +108,15 @@ export default function DisponibilitesSettings() {
     setFeedback(null);
     setError(null);
 
+    const payload = prestation.nocturne
+      ? { ...dispo, heureFin: ajouterMinutes(dispo.heureDebut, prestation.dureeMinutes) }
+      : dispo;
+
     try {
       const res = await fetch("/api/admin/disponibilites", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dispo),
+        body: JSON.stringify({ serviceId, ...payload }),
       });
 
       if (!res.ok) {
@@ -99,46 +140,51 @@ export default function DisponibilitesSettings() {
     return <p className="text-sm text-body">{error ?? "Chargement…"}</p>;
   }
 
-  const d = dispo as unknown as Record<string, boolean>;
-
   return (
     <form
       onSubmit={handleSubmit}
       className="flex h-full flex-col gap-6 rounded-2xl border border-border bg-white/60 p-6"
     >
       <div>
-        <p className="text-sm font-medium text-walnut">Jours et demi-journées travaillés</p>
+        <p className="text-sm font-medium text-walnut">
+          {prestation.nocturne ? "Nuits travaillées" : "Jours et demi-journées travaillés"}
+        </p>
         <div className="mt-3 flex flex-col gap-1.5">
           {jours.map(({ prefix, label }) => {
             const matinCle = `${prefix}Matin`;
             const apresMidiCle = `${prefix}ApresMidi`;
+            const d = dispo as unknown as Record<string, boolean>;
             return (
               <div key={prefix} className="flex items-center gap-3">
                 <span className="w-20 shrink-0 text-sm text-walnut">{label}</span>
                 <div className="inline-flex overflow-hidden rounded-full border border-border">
-                  <button
-                    type="button"
-                    onClick={() => toggle(matinCle)}
-                    aria-pressed={d[matinCle]}
-                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                      d[matinCle]
-                        ? "bg-accent text-parchment"
-                        : "bg-parchment text-walnut/60 hover:bg-peach/40"
-                    }`}
-                  >
-                    Matin
-                  </button>
+                  {!prestation.nocturne && (
+                    <button
+                      type="button"
+                      onClick={() => toggle(matinCle)}
+                      aria-pressed={d[matinCle]}
+                      className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                        d[matinCle]
+                          ? "bg-accent text-parchment"
+                          : "bg-parchment text-walnut/60 hover:bg-peach/40"
+                      }`}
+                    >
+                      Matin
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => toggle(apresMidiCle)}
                     aria-pressed={d[apresMidiCle]}
-                    className={`border-l border-border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      !prestation.nocturne ? "border-l border-border" : ""
+                    } ${
                       d[apresMidiCle]
                         ? "bg-accent text-parchment"
                         : "bg-parchment text-walnut/60 hover:bg-peach/40"
                     }`}
                   >
-                    Après-midi
+                    {prestation.nocturne ? "Nuit disponible" : "Après-midi"}
                   </button>
                 </div>
               </div>
@@ -150,7 +196,7 @@ export default function DisponibilitesSettings() {
       <div className="flex flex-wrap gap-4">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="heureDebut" className="text-sm font-medium text-walnut">
-            Début de matinée
+            {prestation.nocturne ? "Heure de début de garde" : "Début de matinée"}
           </label>
           <input
             id="heureDebut"
@@ -160,34 +206,32 @@ export default function DisponibilitesSettings() {
             className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
           />
         </div>
+        {prestation.nocturne ? (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-walnut">Heure de fin</span>
+            <p className="flex items-center rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut/70">
+              {ajouterMinutes(dispo.heureDebut, prestation.dureeMinutes)} (lendemain)
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="heureFin" className="text-sm font-medium text-walnut">
+              Fin d&apos;après-midi
+            </label>
+            <input
+              id="heureFin"
+              type="time"
+              value={dispo.heureFin}
+              onChange={(e) => setDispo({ ...dispo, heureFin: e.target.value })}
+              className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="heureFin" className="text-sm font-medium text-walnut">
-            Fin d&apos;après-midi
-          </label>
-          <input
-            id="heureFin"
-            type="time"
-            value={dispo.heureFin}
-            onChange={(e) => setDispo({ ...dispo, heureFin: e.target.value })}
-            className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="duree" className="text-sm font-medium text-walnut">
-            Durée d&apos;un créneau (min)
-          </label>
-          <input
-            id="duree"
-            type="number"
-            min={15}
-            max={480}
-            step={5}
-            value={dispo.dureeCreneauMinutes}
-            onChange={(e) =>
-              setDispo({ ...dispo, dureeCreneauMinutes: Number(e.target.value) })
-            }
-            className="w-32 rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
-          />
+          <span className="text-sm font-medium text-walnut">Durée</span>
+          <p className="flex items-center rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut/70">
+            {prestation.dureeMinutes} min
+          </p>
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="maxParJour" className="text-sm font-medium text-walnut">
@@ -216,10 +260,9 @@ export default function DisponibilitesSettings() {
       <p className="text-xs text-body">
         Les créneaux à venir sont générés automatiquement selon ces règles
         (sur ~4 mois glissants), en tenant compte des vacances définies
-        ci-dessous. Une matinée ou un après-midi désactivé ne génère aucun
-        créneau sur ce créneau horaire, ce jour-là. Une fois le nombre
-        maximal de RDV atteint sur une journée, celle-ci n&apos;est plus
-        proposée aux visiteurs du site.
+        ci-dessous. Une fois le nombre maximal de RDV atteint sur une
+        journée pour cette prestation, celle-ci n&apos;est plus proposée
+        aux visiteurs du site.
       </p>
     </form>
   );

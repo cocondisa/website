@@ -26,9 +26,11 @@ function startOfDay(date: Date) {
 }
 
 export default function CreneauxCalendar({
+  serviceId,
   selectedId,
   onSelect,
 }: {
+  serviceId: string;
   selectedId: string | null;
   onSelect: (creneau: CreneauDisponible) => void;
 }) {
@@ -40,7 +42,7 @@ export default function CreneauxCalendar({
   useEffect(() => {
     let cancelled = false;
 
-    fetch("/api/creneaux")
+    fetch(`/api/creneaux?serviceId=${encodeURIComponent(serviceId)}`)
       .then((res) => {
         if (!res.ok) throw new Error("Erreur de chargement");
         return res.json();
@@ -62,7 +64,7 @@ export default function CreneauxCalendar({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [serviceId]);
 
   const creneauxParDate = useMemo(() => {
     const map = new Map<string, CreneauDisponible[]>();

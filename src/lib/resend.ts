@@ -67,21 +67,19 @@ function emailLayout(contentHtml: string): string {
 
 export function clientConfirmationEmail({
   nomComplet,
+  nomPrestation,
   dateFormatee,
   heureFormatee,
+  afficherPreparationBain = false,
 }: {
   nomComplet: string;
+  nomPrestation: string;
   dateFormatee: string;
   heureFormatee: string;
+  afficherPreparationBain?: boolean;
 }) {
-  const content = `
-    <h1 style="color: #412B0B; font-size: 21px; margin: 0 0 16px;">Rendez-vous confirmé</h1>
-    <p style="margin: 0 0 16px;">Bonjour ${escapeHtml(nomComplet)},</p>
-    <p style="margin: 0 0 16px;">
-      Votre rendez-vous pour <strong>Le bain enveloppé</strong> est confirmé
-      le <strong>${escapeHtml(dateFormatee)}</strong> à <strong>${escapeHtml(heureFormatee)}</strong>.
-    </p>
-    <p style="margin: 0 0 20px;">Isabelle a hâte de vous accueillir avec votre bébé.</p>
+  const preparationBox = afficherPreparationBain
+    ? `
     <div style="background-color: #FFD6C0; border-radius: 12px; padding: 16px 20px; margin: 0 0 8px;">
       <p style="margin: 0 0 8px; font-weight: 600; color: #412B0B;">À prévoir avant la séance</p>
       <p style="margin: 0;">
@@ -90,6 +88,18 @@ export function clientConfirmationEmail({
         rechange pour bébé.
       </p>
     </div>
+  `
+    : "";
+
+  const content = `
+    <h1 style="color: #412B0B; font-size: 21px; margin: 0 0 16px;">Rendez-vous confirmé</h1>
+    <p style="margin: 0 0 16px;">Bonjour ${escapeHtml(nomComplet)},</p>
+    <p style="margin: 0 0 16px;">
+      Votre rendez-vous pour <strong>${escapeHtml(nomPrestation)}</strong> est confirmé
+      le <strong>${escapeHtml(dateFormatee)}</strong> à <strong>${escapeHtml(heureFormatee)}</strong>.
+    </p>
+    <p style="margin: 0 0 20px;">Isabelle vous remercie pour votre confiance.</p>
+    ${preparationBox}
     <p style="margin: 20px 0 0; font-size: 13px; color: #7A5F4A;">
       Votre facture est jointe à cet e-mail au format PDF.
     </p>
@@ -103,6 +113,7 @@ export function clientConfirmationEmail({
 
 export function notificationEmail({
   nomComplet,
+  nomPrestation,
   email,
   telephone,
   infosBebe,
@@ -111,6 +122,7 @@ export function notificationEmail({
   heureFormatee,
 }: {
   nomComplet: string;
+  nomPrestation: string;
   email: string;
   telephone: string;
   infosBebe?: string | null;
@@ -121,7 +133,8 @@ export function notificationEmail({
   const content = `
     <h1 style="color: #412B0B; font-size: 21px; margin: 0 0 16px;">Nouvelle réservation</h1>
     <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; font-size: 14px;">
-      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600; width: 110px;">Date</td><td style="padding: 4px 0;">${escapeHtml(dateFormatee)} à ${escapeHtml(heureFormatee)}</td></tr>
+      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600; width: 110px;">Prestation</td><td style="padding: 4px 0;">${escapeHtml(nomPrestation)}</td></tr>
+      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Date</td><td style="padding: 4px 0;">${escapeHtml(dateFormatee)} à ${escapeHtml(heureFormatee)}</td></tr>
       <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Nom</td><td style="padding: 4px 0;">${escapeHtml(nomComplet)}</td></tr>
       <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">E-mail</td><td style="padding: 4px 0;">${escapeHtml(email)}</td></tr>
       <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Téléphone</td><td style="padding: 4px 0;">${escapeHtml(telephone)}</td></tr>
@@ -131,7 +144,7 @@ export function notificationEmail({
   `;
 
   return {
-    subject: `Nouvelle réservation — ${dateFormatee} à ${heureFormatee}`,
+    subject: `Nouvelle réservation — ${nomPrestation} — ${dateFormatee} à ${heureFormatee}`,
     html: emailLayout(content),
   };
 }

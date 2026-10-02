@@ -3,6 +3,9 @@ import Container from "@/components/ui/Container";
 import SectionTitle from "@/components/ui/SectionTitle";
 import DecorativeBlobs from "@/components/ui/DecorativeBlobs";
 import { bainEnveloppe } from "@/lib/site-config";
+import { prestationsList } from "@/lib/prestations";
+
+const autresPrestations = prestationsList.filter((p) => p.id !== "bain-enveloppe");
 
 export default function Tarifs() {
   return (
@@ -11,32 +14,56 @@ export default function Tarifs() {
       <Container className="flex flex-col items-center gap-10">
         <SectionTitle eyebrow="Tarifs" title="Un tarif simple et transparent" />
 
-        <div className="relative w-full max-w-sm rounded-2xl border border-border bg-parchment p-8 text-center shadow-sm">
-          <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-accent px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-parchment shadow-md">
-            {bainEnveloppe.offreLancement}
-          </span>
+        <div className="grid w-full grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative rounded-2xl border border-border bg-parchment p-8 text-center shadow-sm">
+            <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-accent px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-parchment shadow-md">
+              {bainEnveloppe.offreLancement}
+            </span>
 
-          <h3 className="mt-2 text-xl font-semibold text-walnut">
-            {bainEnveloppe.nom}
-          </h3>
-          <p className="mt-1 text-sm font-medium text-sage">
-            + {bainEnveloppe.complement}
-          </p>
-          <p className="mt-1 text-sm text-body">
-            Pour les nouveau-nés de {bainEnveloppe.ageCible}
-          </p>
+            <h3 className="mt-2 text-xl font-semibold text-walnut">
+              {bainEnveloppe.nom}
+            </h3>
+            <p className="mt-1 text-sm font-medium text-sage">
+              + {bainEnveloppe.complement}
+            </p>
+            <p className="mt-1 text-sm text-body">
+              Pour les nouveau-nés de {bainEnveloppe.ageCible}
+            </p>
 
-          <p className="mt-6 text-4xl font-semibold text-accent">
-            {bainEnveloppe.prix}
-          </p>
-          <p className="mt-1 text-xs text-body">
-            {bainEnveloppe.offreLancementDetail}
-          </p>
-          <p className="mt-2 text-sm text-body">Durée : {bainEnveloppe.duree}</p>
+            <p className="mt-6 text-4xl font-semibold text-accent">
+              {bainEnveloppe.prix}
+            </p>
+            <p className="mt-1 text-xs text-body">
+              {bainEnveloppe.offreLancementDetail}
+            </p>
+            <p className="mt-2 text-sm text-body">Durée : {bainEnveloppe.duree}</p>
 
-          <ButtonLink href="/rendez-vous" className="mt-8 w-full">
-            Réserver
-          </ButtonLink>
+            <ButtonLink href="/rendez-vous" className="mt-8 w-full">
+              Réserver
+            </ButtonLink>
+          </div>
+
+          {autresPrestations.map((p) => (
+            <div
+              key={p.id}
+              className="flex flex-col rounded-2xl border border-border bg-parchment p-8 text-center shadow-sm"
+            >
+              <h3 className="text-xl font-semibold text-walnut">{p.nom}</h3>
+              <p className="mt-1 text-sm text-body">{p.lieu}</p>
+
+              <p className="mt-6 text-4xl font-semibold text-accent">{p.prixLabel}</p>
+              <p className="mt-2 text-sm text-body">
+                Durée :{" "}
+                {p.dureeMinutes >= 60
+                  ? `${(p.dureeMinutes / 60).toLocaleString("fr-FR")} h`
+                  : `${p.dureeMinutes} min`}
+              </p>
+
+              <ButtonLink href="/rendez-vous" variant="secondary" className="mt-8 w-full">
+                Réserver
+              </ButtonLink>
+            </div>
+          ))}
         </div>
       </Container>
     </section>

@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import BookingFlow from "@/components/booking/BookingFlow";
-import { bainEnveloppe } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Prendre rendez-vous",
   description:
-    "Réservez votre séance de bain enveloppé pour votre nouveau-né en choisissant un créneau disponible.",
+    "Réservez votre prestation avec Cocon d'Isa en choisissant un créneau disponible.",
   alternates: { canonical: "/rendez-vous" },
 };
 
@@ -19,11 +18,11 @@ export default function RendezVousPage() {
             Réservation en ligne
           </span>
           <h1 className="text-3xl font-semibold text-walnut sm:text-4xl">
-            Prendre rendez-vous pour {bainEnveloppe.nom.toLowerCase()}
+            Prendre rendez-vous
           </h1>
           <p className="mx-auto max-w-xl text-base text-body">
-            Choisissez un créneau disponible ci-dessous, renseignez vos
-            informations et recevez immédiatement votre confirmation par
+            Choisissez une prestation puis un créneau disponible, renseignez
+            vos informations et recevez immédiatement votre confirmation par
             e-mail.
           </p>
         </div>
