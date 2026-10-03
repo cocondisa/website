@@ -61,7 +61,9 @@ export default function BainEnveloppe() {
                 préalablement installé tout le matériel nécessaire : je vous
                 guide alors en douceur pour réaliser ensemble le bain
                 enveloppé. La séance se termine par la transmission des
-                gestes d&apos;un massage de réflexologie plantaire pour bébé.
+                gestes d&apos;un massage de réflexologie plantaire pour bébé,
+                puis un brunch convivial pour prendre le temps d&apos;échanger
+                ensemble — inclus dans le tarif.
               </p>
             </div>
           </div>

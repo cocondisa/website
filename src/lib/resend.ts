@@ -118,6 +118,7 @@ export function notificationEmail({
   telephone,
   infosBebe,
   message,
+  adresseClient,
   dateFormatee,
   heureFormatee,
 }: {
@@ -127,6 +128,7 @@ export function notificationEmail({
   telephone: string;
   infosBebe?: string | null;
   message?: string | null;
+  adresseClient?: string | null;
   dateFormatee: string;
   heureFormatee: string;
 }) {
@@ -138,6 +140,7 @@ export function notificationEmail({
       <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Nom</td><td style="padding: 4px 0;">${escapeHtml(nomComplet)}</td></tr>
       <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">E-mail</td><td style="padding: 4px 0;">${escapeHtml(email)}</td></tr>
       <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Téléphone</td><td style="padding: 4px 0;">${escapeHtml(telephone)}</td></tr>
+      ${adresseClient ? `<tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Adresse</td><td style="padding: 4px 0;">${escapeHtml(adresseClient)}</td></tr>` : ""}
       ${infosBebe ? `<tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Infos bébé</td><td style="padding: 4px 0;">${escapeHtml(infosBebe)}</td></tr>` : ""}
       ${message ? `<tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Message</td><td style="padding: 4px 0;">${escapeHtml(message)}</td></tr>` : ""}
     </table>

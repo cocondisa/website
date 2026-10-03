@@ -51,6 +51,11 @@ model Reservation {
   telephone       String
   infosBebe       String?
   message         String?
+  // Renseignés uniquement pour la garde de nuit (adresse géocodée côté
+  // serveur, distance utilisée pour calculer le tarif et refuser les
+  // réservations au-delà de 35 km).
+  adresseClient   String?
+  distanceKm      Float?
   statut          StatutReservation @default(EN_ATTENTE_PAIEMENT)
   stripeSessionId String?           @unique
   expiresAt       DateTime? // retenue expirée = créneau libérable si le paiement n'a pas abouti

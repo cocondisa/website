@@ -5,6 +5,14 @@ import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { siteConfig } from "@/lib/site-config";
 import { prestations, type PrestationId } from "@/lib/prestations";
+import {
+  ADRESSE_ISABELLE,
+  DISTANCE_MAX_KM,
+  DISTANCE_SEUIL_SURCOUT_KM,
+  SURCOUT_DISTANCE_CENTIMES,
+  distanceKm,
+  geocoderAdresse,
+} from "@/lib/geo";
 
 const reservationSchema = z.object({
   creneauId: z.string().min(1, "Créneau invalide."),
@@ -13,6 +21,8 @@ const reservationSchema = z.object({
   telephone: z.string().trim().min(6, "Numéro de téléphone invalide."),
   infosBebe: z.string().trim().max(500).optional(),
   message: z.string().trim().max(1000).optional(),
+  // Requise uniquement pour la garde de nuit — validée plus bas.
+  adresse: z.string().trim().max(300).optional(),
 });
 
 const HOLD_DURATION_MS = 30 * 60 * 1000; // 30 min — minimum accepté par Stripe Checkout
@@ -28,13 +38,63 @@ export async function POST(request: Request) {
     );
   }
 
-  const { creneauId, nomComplet, email, telephone, infosBebe, message } =
+  const { creneauId, nomComplet, email, telephone, infosBebe, message, adresse } =
     parsed.data;
 
   try {
+    // Lecture préalable (hors transaction) pour connaître la prestation et,
+    // pour la garde de nuit, valider l'adresse avant de retenir le créneau —
+    // inutile de le bloquer puis le libérer pour une adresse invalide.
+    const creneauPeek = await prisma.creneau.findUnique({ where: { id: creneauId } });
+    if (!creneauPeek || !creneauPeek.disponible) {
+      throw new Error("CRENEAU_INDISPONIBLE");
+    }
+
+    const prestationId = creneauPeek.prestationId as PrestationId;
+    const prestation = prestations[prestationId];
+    if (!prestation) {
+      throw new Error("PRESTATION_INCONNUE");
+    }
+
+    let prixCentimes = prestation.prixCentimes;
+    let adresseGeocodee: string | null = null;
+    let distanceCalculee: number | null = null;
+
+    if (prestation.id === "garde-nuit") {
+      if (!adresse) {
+        return NextResponse.json(
+          { error: "Merci de renseigner l'adresse où Isabelle doit se rendre." },
+          { status: 400 }
+        );
+      }
+
+      const geo = await geocoderAdresse(adresse);
+      if (!geo) {
+        return NextResponse.json(
+          { error: "Adresse introuvable. Merci de vérifier votre saisie." },
+          { status: 422 }
+        );
+      }
+
+      distanceCalculee = distanceKm(ADRESSE_ISABELLE, geo);
+      if (distanceCalculee > DISTANCE_MAX_KM) {
+        return NextResponse.json(
+          {
+            error: `Isabelle ne se déplace pas au-delà de ${DISTANCE_MAX_KM} km de Tournefeuille (${Math.round(distanceCalculee)} km calculés pour cette adresse).`,
+          },
+          { status: 422 }
+        );
+      }
+
+      if (distanceCalculee > DISTANCE_SEUIL_SURCOUT_KM) {
+        prixCentimes += SURCOUT_DISTANCE_CENTIMES;
+      }
+      adresseGeocodee = geo.label;
+    }
+
     const expiresAt = new Date(Date.now() + HOLD_DURATION_MS);
 
-    const { reservation, prestationId } = await prisma.$transaction(async (tx) => {
+    const { reservation } = await prisma.$transaction(async (tx) => {
       const found = await tx.creneau.findUnique({ where: { id: creneauId } });
 
       if (!found || !found.disponible) {
@@ -54,27 +114,24 @@ export async function POST(request: Request) {
           telephone,
           infosBebe,
           message,
+          adresseClient: adresseGeocodee,
+          distanceKm: distanceCalculee,
           statut: "EN_ATTENTE_PAIEMENT",
           expiresAt,
         },
       });
 
-      return { reservation: created, prestationId: found.prestationId as PrestationId };
+      return { reservation: created };
     });
 
     try {
-      const prestation = prestations[prestationId];
-      if (!prestation) {
-        throw new Error("PRESTATION_INCONNUE");
-      }
-
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items: [
           {
             price_data: {
               currency: "eur",
-              unit_amount: prestation.prixCentimes,
+              unit_amount: prixCentimes,
               product_data: { name: prestation.nom },
             },
             quantity: 1,

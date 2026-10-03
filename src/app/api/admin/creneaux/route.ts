@@ -32,6 +32,7 @@ export async function GET() {
           nomComplet: true,
           email: true,
           telephone: true,
+          adresseClient: true,
           statut: true,
           facture: { select: { id: true } },
         },

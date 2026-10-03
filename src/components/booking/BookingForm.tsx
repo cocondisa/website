@@ -2,17 +2,23 @@
 
 import { FormEvent, useState } from "react";
 import Button from "@/components/ui/Button";
+import AdresseAutocomplete from "@/components/booking/AdresseAutocomplete";
+import type { PrestationId } from "@/lib/prestations";
 import type { CreneauDisponible } from "@/types";
 
 export default function BookingForm({
   creneau,
+  serviceId,
   onCreneauIndisponible,
 }: {
   creneau: CreneauDisponible;
+  serviceId: PrestationId;
   onCreneauIndisponible: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [adresse, setAdresse] = useState("");
+  const requiertAdresse = serviceId === "garde-nuit";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,6 +33,7 @@ export default function BookingForm({
       telephone: String(formData.get("telephone") ?? ""),
       infosBebe: String(formData.get("infosBebe") ?? ""),
       message: String(formData.get("message") ?? ""),
+      ...(requiertAdresse ? { adresse } : {}),
     };
 
     try {
@@ -74,6 +81,8 @@ export default function BookingForm({
       </div>
 
       <Field label="E-mail" name="email" type="email" required autoComplete="email" />
+
+      {requiertAdresse && <AdresseAutocomplete value={adresse} onChange={setAdresse} />}
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="infosBebe" className="text-sm font-medium text-walnut">

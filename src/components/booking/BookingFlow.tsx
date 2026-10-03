@@ -84,6 +84,7 @@ export default function BookingFlow() {
                 </p>
                 <BookingForm
                   creneau={selected}
+                  serviceId={serviceId!}
                   onCreneauIndisponible={() => {
                     setSelected(null);
                     setRefreshKey((key) => key + 1);

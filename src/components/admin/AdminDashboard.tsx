@@ -16,6 +16,7 @@ type CreneauAdmin = {
     nomComplet: string;
     email: string;
     telephone: string;
+    adresseClient: string | null;
     statut: "EN_ATTENTE_PAIEMENT" | "CONFIRMEE" | "ANNULEE";
     facture: { id: string } | null;
   } | null;
@@ -226,10 +227,17 @@ export default function AdminDashboard() {
                     {prestations[creneau.prestationId as PrestationId]?.nom ?? creneau.prestationId}
                   </p>
                   {creneau.reservation ? (
-                    <p className="text-xs text-body">
-                      {creneau.reservation.nomComplet} — {creneau.reservation.email} —{" "}
-                      {creneau.reservation.telephone}
-                    </p>
+                    <>
+                      <p className="text-xs text-body">
+                        {creneau.reservation.nomComplet} — {creneau.reservation.email} —{" "}
+                        {creneau.reservation.telephone}
+                      </p>
+                      {creneau.reservation.adresseClient && (
+                        <p className="text-xs font-medium text-walnut">
+                          📍 {creneau.reservation.adresseClient}
+                        </p>
+                      )}
+                    </>
                   ) : (
                     <p className="text-xs text-body">Disponible</p>
                   )}

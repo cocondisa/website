@@ -98,6 +98,7 @@ async function confirmReservation(reservationId: string, montantTotalCentimes: n
             telephone: reservation.telephone,
             infosBebe: reservation.infosBebe,
             message: reservation.message,
+            adresseClient: reservation.adresseClient,
             dateFormatee,
             heureFormatee,
           }),
