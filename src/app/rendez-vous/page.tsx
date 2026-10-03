@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Container from "@/components/ui/Container";
 import BookingFlow from "@/components/booking/BookingFlow";
 
@@ -27,7 +28,9 @@ export default function RendezVousPage() {
           </p>
         </div>
 
-        <BookingFlow />
+        <Suspense fallback={null}>
+          <BookingFlow />
+        </Suspense>
       </Container>
     </section>
   );

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import CreneauxCalendar from "@/components/booking/CreneauxCalendar";
 import BookingForm from "@/components/booking/BookingForm";
-import { prestationsList, type PrestationId } from "@/lib/prestations";
+import { isPrestationId, prestationsList, type PrestationId } from "@/lib/prestations";
 import type { CreneauDisponible } from "@/types";
 
 const heureFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -15,7 +16,12 @@ const heureFormatter = new Intl.DateTimeFormat("fr-FR", {
 });
 
 export default function BookingFlow() {
-  const [serviceId, setServiceId] = useState<PrestationId | null>(null);
+  const searchParams = useSearchParams();
+  const prestationParam = searchParams.get("prestation");
+  const prestationInitiale =
+    prestationParam && isPrestationId(prestationParam) ? prestationParam : null;
+
+  const [serviceId, setServiceId] = useState<PrestationId | null>(prestationInitiale);
   const [selected, setSelected] = useState<CreneauDisponible | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 

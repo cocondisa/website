@@ -71,7 +71,7 @@ export default function Tarifs() {
             </p>
             <p className="mt-2 text-sm text-body">Durée : {bainEnveloppe.duree}</p>
 
-            <ButtonLink href="/rendez-vous" className="mt-auto w-full">
+            <ButtonLink href="/rendez-vous?prestation=bain-enveloppe" className="mt-auto w-full">
               Réserver
             </ButtonLink>
           </div>
@@ -93,12 +93,16 @@ export default function Tarifs() {
                         </p>
                         <p className="mt-1 text-2xl font-semibold text-accent">{p.prixLabel}</p>
                         <p className="mt-1 text-xs text-body">{formatDuree(p.dureeMinutes)}</p>
+                        <ButtonLink
+                          href={`/rendez-vous?prestation=${p.id}`}
+                          variant="ghost"
+                          className="mt-2 !px-0 !py-0 text-xs"
+                        >
+                          Réserver →
+                        </ButtonLink>
                       </div>
                     ))}
                   </div>
-                  <ButtonLink href="/rendez-vous" variant="secondary" className="mt-auto w-full">
-                    Réserver
-                  </ButtonLink>
                 </div>
               );
             }
@@ -115,7 +119,11 @@ export default function Tarifs() {
                 <p className="mt-6 text-4xl font-semibold text-accent">{p.prixLabel}</p>
                 <p className="mt-2 text-sm text-body">Durée : {formatDuree(p.dureeMinutes)}</p>
 
-                <ButtonLink href="/rendez-vous" variant="secondary" className="mt-auto w-full">
+                <ButtonLink
+                  href={`/rendez-vous?prestation=${p.id}`}
+                  variant="secondary"
+                  className="mt-auto w-full"
+                >
                   Réserver
                 </ButtonLink>
               </div>
