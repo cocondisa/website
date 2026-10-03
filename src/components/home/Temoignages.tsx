@@ -18,11 +18,11 @@ export default function Temoignages() {
       <Container className="flex flex-col gap-10">
         <SectionTitle eyebrow="Avis" title="Ce qu'en disent les parents" />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none">
           {temoignages.map((temoignage) => (
             <figure
               key={temoignage.nom}
-              className="flex flex-col gap-4 rounded-2xl border border-border bg-white/60 p-6"
+              className="flex w-[80%] shrink-0 snap-center flex-col gap-4 rounded-2xl border border-border bg-white/60 p-6 sm:w-auto sm:shrink"
             >
               <div
                 aria-label={`Note : ${temoignage.note} sur 5`}

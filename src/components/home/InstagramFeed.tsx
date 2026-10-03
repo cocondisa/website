@@ -34,19 +34,20 @@ export default function InstagramFeed() {
       <Container className="flex flex-col items-center gap-10">
         <SectionTitle eyebrow="Instagram" title="Suivez Cocon d'Isa" />
 
-        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="-mx-4 flex w-full snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none">
           {POSTS.map((url) => (
-            <blockquote
-              key={url}
-              className="instagram-media"
-              data-instgrm-permalink={url}
-              data-instgrm-version="14"
-              style={{ margin: 0, width: "100%" }}
-            >
-              <a href={url} target="_blank" rel="noopener noreferrer">
-                Voir cette publication sur Instagram
-              </a>
-            </blockquote>
+            <div key={url} className="w-[80%] shrink-0 snap-center sm:w-auto sm:shrink">
+              <blockquote
+                className="instagram-media"
+                data-instgrm-permalink={url}
+                data-instgrm-version="14"
+                style={{ margin: 0, width: "100%" }}
+              >
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  Voir cette publication sur Instagram
+                </a>
+              </blockquote>
+            </div>
           ))}
         </div>
 
