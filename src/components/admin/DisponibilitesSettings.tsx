@@ -77,6 +77,10 @@ function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
   const [error, setError] = useState<string | null>(null);
 
   const prestation = prestationsList.find((p) => p.id === serviceId)!;
+  // Nocturne (garde de nuit) et plage fixe (ex. brunch entre midi et deux)
+  // partagent la même UI simplifiée : un seul créneau par jour, pas de
+  // bascule "Matin".
+  const planningSimplifie = prestation.nocturne || Boolean(prestation.plageFixe);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,7 +114,14 @@ function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
 
     const payload = prestation.nocturne
       ? { ...dispo, heureFin: ajouterMinutes(dispo.heureDebut, prestation.dureeMinutes) }
-      : dispo;
+      : prestation.plageFixe
+        ? {
+            ...dispo,
+            heureDebut: prestation.plageFixe.debut,
+            heureMidi: prestation.plageFixe.debut,
+            heureFin: prestation.plageFixe.fin,
+          }
+        : dispo;
 
     try {
       const res = await fetch("/api/admin/disponibilites", {
@@ -147,7 +158,11 @@ function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
     >
       <div>
         <p className="text-sm font-medium text-walnut">
-          {prestation.nocturne ? "Nuits travaillées" : "Jours et demi-journées travaillés"}
+          {prestation.nocturne
+            ? "Nuits travaillées"
+            : prestation.plageFixe
+              ? "Jours proposés"
+              : "Jours et demi-journées travaillés"}
         </p>
         <div className="mt-3 flex flex-col gap-1.5">
           {jours.map(({ prefix, label }) => {
@@ -158,7 +173,7 @@ function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
               <div key={prefix} className="flex items-center gap-3">
                 <span className="w-20 shrink-0 text-sm text-walnut">{label}</span>
                 <div className="inline-flex overflow-hidden rounded-full border border-border">
-                  {!prestation.nocturne && (
+                  {!planningSimplifie && (
                     <button
                       type="button"
                       onClick={() => toggle(matinCle)}
@@ -177,14 +192,18 @@ function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
                     onClick={() => toggle(apresMidiCle)}
                     aria-pressed={d[apresMidiCle]}
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                      !prestation.nocturne ? "border-l border-border" : ""
+                      !planningSimplifie ? "border-l border-border" : ""
                     } ${
                       d[apresMidiCle]
                         ? "bg-accent text-parchment"
                         : "bg-parchment text-walnut/60 hover:bg-peach/40"
                     }`}
                   >
-                    {prestation.nocturne ? "Nuit disponible" : "Après-midi"}
+                    {prestation.nocturne
+                      ? "Nuit disponible"
+                      : prestation.plageFixe
+                        ? "Jour disponible"
+                        : "Après-midi"}
                   </button>
                 </div>
               </div>
@@ -194,38 +213,49 @@ function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="heureDebut" className="text-sm font-medium text-walnut">
-            {prestation.nocturne ? "Heure de début de garde" : "Début de matinée"}
-          </label>
-          <input
-            id="heureDebut"
-            type="time"
-            value={dispo.heureDebut}
-            onChange={(e) => setDispo({ ...dispo, heureDebut: e.target.value })}
-            className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
-          />
-        </div>
-        {prestation.nocturne ? (
+        {prestation.plageFixe ? (
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-walnut">Heure de fin</span>
+            <span className="text-sm font-medium text-walnut">Horaire</span>
             <p className="flex items-center rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut/70">
-              {ajouterMinutes(dispo.heureDebut, prestation.dureeMinutes)} (lendemain)
+              {prestation.plageFixe.debut} – {prestation.plageFixe.fin} (fixe)
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="heureFin" className="text-sm font-medium text-walnut">
-              Fin d&apos;après-midi
-            </label>
-            <input
-              id="heureFin"
-              type="time"
-              value={dispo.heureFin}
-              onChange={(e) => setDispo({ ...dispo, heureFin: e.target.value })}
-              className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
-            />
-          </div>
+          <>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="heureDebut" className="text-sm font-medium text-walnut">
+                {prestation.nocturne ? "Heure de début de garde" : "Début de matinée"}
+              </label>
+              <input
+                id="heureDebut"
+                type="time"
+                value={dispo.heureDebut}
+                onChange={(e) => setDispo({ ...dispo, heureDebut: e.target.value })}
+                className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
+              />
+            </div>
+            {prestation.nocturne ? (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-walnut">Heure de fin</span>
+                <p className="flex items-center rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut/70">
+                  {ajouterMinutes(dispo.heureDebut, prestation.dureeMinutes)} (lendemain)
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="heureFin" className="text-sm font-medium text-walnut">
+                  Fin d&apos;après-midi
+                </label>
+                <input
+                  id="heureFin"
+                  type="time"
+                  value={dispo.heureFin}
+                  onChange={(e) => setDispo({ ...dispo, heureFin: e.target.value })}
+                  className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
+                />
+              </div>
+            )}
+          </>
         )}
         <div className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-walnut">Durée</span>

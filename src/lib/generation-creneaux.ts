@@ -63,13 +63,22 @@ function genererHeuresEntre(heureDebut: string, heureFin: string, dureeMinutes: 
  * nuit), le créneau unique du jour démarre à `heureDebut` et traverse minuit
  * (sa durée vient entièrement de la prestation, pas d'un découpage en
  * sous-créneaux) ; seule la bascule `*ApresMidi` du jour sert alors
- * d'indicateur "nuit disponible", `*Matin` n'est pas utilisé.
+ * d'indicateur "nuit disponible", `*Matin` n'est pas utilisé. Pour une
+ * prestation à plage horaire fixe (ex. le brunch entre midi et deux), même
+ * principe : `*ApresMidi` sert de bascule "jour disponible", mais les
+ * créneaux sont générés sur `prestation.plageFixe` plutôt que sur les heures
+ * de la Disponibilite (qui ne sont alors pas utilisées).
  */
 function genererHeuresDuJour(dispo: Disponibilite, prestation: Prestation, isoWeekday: number): string[] {
   const { matin, apresMidi } = demiJourneesActives(dispo, isoWeekday);
 
   if (prestation.nocturne) {
     return apresMidi ? [dispo.heureDebut] : [];
+  }
+
+  if (prestation.plageFixe) {
+    if (!apresMidi) return [];
+    return genererHeuresEntre(prestation.plageFixe.debut, prestation.plageFixe.fin, prestation.dureeMinutes);
   }
 
   const heures: string[] = [];

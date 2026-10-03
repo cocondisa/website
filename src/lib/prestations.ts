@@ -25,11 +25,22 @@ export type Prestation = {
   // Créneau qui commence un jour et se termine le lendemain (ex. 20h → 4h) :
   // change la façon dont la génération de créneaux calcule l'heure de fin.
   nocturne?: boolean;
+  // Plage horaire fixe, non modifiable depuis /admin (contrainte métier,
+  // ex. le brunch ne se prend qu'entre midi et deux) : remplace entièrement
+  // heureDebut/heureMidi/heureFin de la Disponibilite pour cette prestation.
+  // Seuls les jours de la semaine restent configurables par Isabelle.
+  plageFixe?: { debut: string; fin: string };
   // Le prix dépend d'une donnée saisie à la réservation (distance du
   // domicile pour la garde de nuit) : prixCentimes/prixLabel ci-dessus
   // restent le tarif de base affiché, le montant réel est recalculé côté
   // serveur dans /api/reservations.
   tarifVariable?: boolean;
+  // Produit Stripe correspondant (mode live), pour que les paiements soient
+  // rattachés à un produit nommé dans le dashboard plutôt qu'à un simple
+  // montant ad hoc. Le prix reste calculé dynamiquement (price_data) pour
+  // garder la flexibilité des codes promo et du tarif variable de la garde
+  // de nuit — seul le produit est figé.
+  stripeProductId: string;
 };
 
 export const prestations: Record<PrestationId, Prestation> = {
@@ -42,6 +53,7 @@ export const prestations: Record<PrestationId, Prestation> = {
     prixCentimes: 15000,
     prixLabel: "150 €",
     lieu: "Chez Isabelle, à Tournefeuille (31)",
+    stripeProductId: "prod_VEcNda4saCdgpy",
   },
   "rituel-rebozo": {
     id: "rituel-rebozo",
@@ -52,6 +64,7 @@ export const prestations: Record<PrestationId, Prestation> = {
     prixCentimes: 10000,
     prixLabel: "100 €",
     lieu: "Chez Isabelle, à Tournefeuille (31)",
+    stripeProductId: "prod_VN7QkIMecam7U2",
   },
   "appel-conseil": {
     id: "appel-conseil",
@@ -63,17 +76,20 @@ export const prestations: Record<PrestationId, Prestation> = {
     prixLabel: "25 €",
     lieu: "Par téléphone",
     categorie: "Accompagnement",
+    stripeProductId: "prod_VN7QlsNoWxBrG3",
   },
   "accompagnement-brunch": {
     id: "accompagnement-brunch",
     nom: "Accompagnement — Rencontre avec brunch",
     description:
-      "Un moment d'échange en tête-à-tête chez Isabelle, accompagné d'un brunch, pour prendre le temps de parler de votre quotidien avec bébé.",
+      "Un moment d'échange en tête-à-tête chez Isabelle, accompagné d'un brunch, pour prendre le temps de parler de votre quotidien avec bébé. Proposé entre midi et deux.",
     dureeMinutes: 90,
     prixCentimes: 4000,
     prixLabel: "40 €",
     lieu: "Chez Isabelle, à Tournefeuille (31)",
     categorie: "Accompagnement",
+    plageFixe: { debut: "12:00", fin: "14:00" },
+    stripeProductId: "prod_VN7Q562zGJxMdd",
   },
   "garde-nuit": {
     id: "garde-nuit",
@@ -86,6 +102,7 @@ export const prestations: Record<PrestationId, Prestation> = {
     lieu: "À votre domicile",
     nocturne: true,
     tarifVariable: true,
+    stripeProductId: "prod_VN7QHcrM1OKtZ6",
   },
 };
 

@@ -132,7 +132,7 @@ export async function POST(request: Request) {
             price_data: {
               currency: "eur",
               unit_amount: prixCentimes,
-              product_data: { name: prestation.nom },
+              product: prestation.stripeProductId,
             },
             quantity: 1,
           },
