@@ -5,6 +5,7 @@ import BainEnveloppe from "@/components/home/BainEnveloppe";
 import Tarifs from "@/components/home/Tarifs";
 import Temoignages from "@/components/home/Temoignages";
 import Faq from "@/components/home/Faq";
+import InstagramFeed from "@/components/home/InstagramFeed";
 import CtaFinal from "@/components/home/CtaFinal";
 import { contact, siteConfig } from "@/lib/site-config";
 
@@ -58,6 +59,7 @@ export default function HomePage() {
       <Tarifs />
       <Temoignages />
       <Faq />
+      <InstagramFeed />
       <CtaFinal />
     </>
   );
