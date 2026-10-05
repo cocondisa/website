@@ -55,6 +55,9 @@ export default function Tarifs() {
             <p className="mt-1 text-sm font-medium text-sage">
               + {bainEnveloppe.complement}
             </p>
+            <p className="mt-1 text-sm font-semibold text-sage">
+              🥐 + Brunch inclus
+            </p>
             <p className="mt-1 text-sm text-body">
               Pour les nouveau-nés de {bainEnveloppe.ageCible}
             </p>
