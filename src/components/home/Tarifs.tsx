@@ -48,12 +48,8 @@ export default function Tarifs() {
         <SectionTitle eyebrow="Tarifs" title="Un tarif simple et transparent" />
 
         <div className="-mx-4 flex w-full snap-x snap-mandatory items-stretch gap-6 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-4">
-          <div className="relative flex h-full w-[80%] shrink-0 snap-center flex-col rounded-2xl border border-border bg-parchment p-8 text-center shadow-sm transition-shadow duration-300 hover:shadow-[0_0_32px_4px_rgba(232,130,95,0.35)] sm:w-auto sm:shrink">
-            <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-accent px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-parchment shadow-md">
-              {bainEnveloppe.offreLancement}
-            </span>
-
-            <h3 className="mt-2 text-xl font-semibold text-walnut">
+          <div className="flex h-full w-[80%] shrink-0 snap-center flex-col rounded-2xl border border-border bg-parchment p-8 text-center shadow-sm transition-shadow duration-300 hover:shadow-[0_0_32px_4px_rgba(232,130,95,0.35)] sm:w-auto sm:shrink">
+            <h3 className="text-xl font-semibold text-walnut">
               {bainEnveloppe.nom}
             </h3>
             <p className="mt-1 text-sm font-medium text-sage">
@@ -65,9 +61,6 @@ export default function Tarifs() {
 
             <p className="mt-6 text-4xl font-semibold text-accent">
               {bainEnveloppe.prix}
-            </p>
-            <p className="mt-1 text-xs text-body">
-              {bainEnveloppe.offreLancementDetail}
             </p>
             <p className="mt-2 text-sm text-body">Durée : {bainEnveloppe.duree}</p>
 
