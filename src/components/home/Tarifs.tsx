@@ -56,7 +56,7 @@ export default function Tarifs() {
               + {bainEnveloppe.complement}
             </p>
             <p className="mt-1 text-sm font-semibold text-sage">
-              🥐 + Brunch inclus
+              avec brunch inclus 🥐
             </p>
             <p className="mt-1 text-sm text-body">
               Pour les nouveau-nés de {bainEnveloppe.ageCible}
@@ -89,6 +89,11 @@ export default function Tarifs() {
                         </p>
                         <p className="mt-1 text-2xl font-semibold text-accent">{p.prixLabel}</p>
                         <p className="mt-1 text-xs text-body">{formatDuree(p.dureeMinutes)}</p>
+                        {p.id === "accompagnement-brunch" && (
+                          <p className="mt-1 text-xs font-semibold text-sage">
+                            avec brunch inclus 🥐
+                          </p>
+                        )}
                         <ButtonLink
                           href={`/rendez-vous?prestation=${p.id}`}
                           variant="ghost"
