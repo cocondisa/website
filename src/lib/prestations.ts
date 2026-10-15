@@ -50,8 +50,8 @@ export const prestations: Record<PrestationId, Prestation> = {
     description:
       "Un moment d'apaisement profond pour le nouveau-né (0 à 2 mois), enveloppé dans un lange pendant son immersion dans l'eau chaude, suivi d'un brunch convivial pour échanger avec Isabelle (inclus).",
     dureeMinutes: 90,
-    prixCentimes: 15000,
-    prixLabel: "150 €",
+    prixCentimes: 9000,
+    prixLabel: "90 €",
     lieu: "Chez Isabelle, à Tournefeuille (31)",
     stripeProductId: "prod_VEcNda4saCdgpy",
   },

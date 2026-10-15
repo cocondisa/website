@@ -41,7 +41,7 @@ export const bainEnveloppe = {
   nom: "Le bain enveloppé",
   complement: "Moment détente parents",
   ageCible: "0 à 2 mois",
-  prix: "150 €",
+  prix: "90 €",
   duree: "1h30",
 };
 
