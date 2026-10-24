@@ -81,9 +81,15 @@ function genererHeuresDuJour(dispo: Disponibilite, prestation: Prestation, isoWe
     return genererHeuresEntre(prestation.plageFixe.debut, prestation.plageFixe.fin, prestation.dureeMinutes);
   }
 
+  // Le samedi a ses propres horaires de début/fin (souvent différents de la
+  // semaine) ; le point de coupure matin/après-midi (heureMidi) reste le même.
+  const estSamedi = isoWeekday === 6;
+  const heureDebut = estSamedi ? dispo.samediHeureDebut : dispo.heureDebut;
+  const heureFin = estSamedi ? dispo.samediHeureFin : dispo.heureFin;
+
   const heures: string[] = [];
-  if (matin) heures.push(...genererHeuresEntre(dispo.heureDebut, dispo.heureMidi, prestation.dureeMinutes));
-  if (apresMidi) heures.push(...genererHeuresEntre(dispo.heureMidi, dispo.heureFin, prestation.dureeMinutes));
+  if (matin) heures.push(...genererHeuresEntre(heureDebut, dispo.heureMidi, prestation.dureeMinutes));
+  if (apresMidi) heures.push(...genererHeuresEntre(dispo.heureMidi, heureFin, prestation.dureeMinutes));
   return heures;
 }
 

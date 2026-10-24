@@ -22,6 +22,8 @@ type Disponibilite = {
   heureDebut: string;
   heureMidi: string;
   heureFin: string;
+  samediHeureDebut: string;
+  samediHeureFin: string;
   maxRdvParJour: number;
 };
 
@@ -263,6 +265,41 @@ function DisponibiliteForm({ serviceId }: { serviceId: PrestationId }) {
             {prestation.dureeMinutes} min
           </p>
         </div>
+      </div>
+
+      {!planningSimplifie && (
+        <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="samediHeureDebut" className="text-sm font-medium text-walnut">
+              Début le samedi
+            </label>
+            <input
+              id="samediHeureDebut"
+              type="time"
+              value={dispo.samediHeureDebut}
+              onChange={(e) => setDispo({ ...dispo, samediHeureDebut: e.target.value })}
+              className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="samediHeureFin" className="text-sm font-medium text-walnut">
+              Fin le samedi
+            </label>
+            <input
+              id="samediHeureFin"
+              type="time"
+              value={dispo.samediHeureFin}
+              onChange={(e) => setDispo({ ...dispo, samediHeureFin: e.target.value })}
+              className="rounded-xl border border-border bg-parchment px-3 py-2 text-sm text-walnut focus:border-accent focus:outline-none"
+            />
+          </div>
+          <p className="max-w-[12rem] self-end text-xs text-body">
+            Appliqué uniquement si &laquo;&nbsp;Samedi&nbsp;&raquo; est coché ci-dessus (peut différer des horaires de semaine).
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-4">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="maxParJour" className="text-sm font-medium text-walnut">
             Max. RDV / jour

@@ -41,6 +41,8 @@ const disponibiliteSchema = z.object({
   heureDebut: z.string().regex(heureRegex, "Heure invalide."),
   heureMidi: z.string().regex(heureRegex, "Heure invalide."),
   heureFin: z.string().regex(heureRegex, "Heure invalide."),
+  samediHeureDebut: z.string().regex(heureRegex, "Heure invalide."),
+  samediHeureFin: z.string().regex(heureRegex, "Heure invalide."),
   maxRdvParJour: z.number().int().min(1).max(50),
 });
 
@@ -58,13 +60,20 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Prestation invalide." }, { status: 400 });
   }
 
-  // Une prestation nocturne (ex. garde de nuit) traverse minuit : son heure
-  // de fin est normalement avant son heure de début, donc on ne lui applique
-  // pas la vérification d'ordre "début < milieu < fin".
-  const nocturne = prestations[serviceId].nocturne ?? false;
-  if (!nocturne && (data.heureDebut >= data.heureMidi || data.heureMidi >= data.heureFin)) {
+  // Une prestation nocturne (ex. garde de nuit) traverse minuit, et une
+  // prestation à plage fixe (ex. le brunch) n'utilise pas ces champs du
+  // tout : pas de vérification d'ordre "début < milieu < fin" pour elles.
+  const prestation = prestations[serviceId];
+  const verifierOrdre = !prestation.nocturne && !prestation.plageFixe;
+  if (
+    verifierOrdre &&
+    (data.heureDebut >= data.heureMidi ||
+      data.heureMidi >= data.heureFin ||
+      data.samediHeureDebut >= data.heureMidi ||
+      data.heureMidi >= data.samediHeureFin)
+  ) {
     return NextResponse.json(
-      { error: "Les horaires doivent être dans l'ordre : début < milieu de journée < fin." },
+      { error: "Les horaires doivent être dans l'ordre : début < milieu de journée < fin (semaine et samedi)." },
       { status: 400 }
     );
   }

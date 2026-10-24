@@ -4,6 +4,7 @@ import AdminDashboard from "@/components/admin/AdminDashboard";
 import DisponibilitesSettings from "@/components/admin/DisponibilitesSettings";
 import VacancesCalendar from "@/components/admin/VacancesCalendar";
 import BannerSettings from "@/components/admin/BannerSettings";
+import StatsVues from "@/components/admin/StatsVues";
 import LogoutButton from "@/components/admin/LogoutButton";
 
 export const metadata: Metadata = {
@@ -18,6 +19,11 @@ export default function AdminPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-walnut">Espace admin</h1>
           <LogoutButton />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold text-walnut">Vues du site</h2>
+          <StatsVues />
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-stretch">

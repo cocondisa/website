@@ -87,6 +87,14 @@ model Vacances {
   @@index([debut, fin])
 }
 
+// Compteur de vues du site, un total par jour (id = "YYYY-MM-DD"),
+// incrémenté par un petit tracker côté client (hors /admin). Agrégé
+// (aucune donnée par visiteur conservée) — pas de bandeau cookies requis.
+model VueSite {
+  id       String @id
+  compteur Int    @default(0)
+}
+
 // Ligne unique (id fixe "default") pour les réglages globaux du site :
 // bandeau d'annonce affichable/masquable par Isabelle depuis l'admin.
 model Parametres {
@@ -129,5 +137,11 @@ model Disponibilite {
   heureDebut    String @default("09:00") // format "HH:mm", heure de Paris
   heureMidi     String @default("13:00") // fin de matinée / début d'après-midi
   heureFin      String @default("17:00") // pour une prestation nocturne, peut être < heureDebut (passage minuit)
-  maxRdvParJour Int    @default(4)
+  // Horaires propres au samedi (souvent différents de la semaine), utilisés
+  // à la place de heureDebut/heureFin quand samediMatin/samediApresMidi est
+  // actif — heureMidi reste le même point de coupure matin/après-midi.
+  // Non utilisés pour les prestations nocturnes ou à plage fixe.
+  samediHeureDebut String @default("09:00")
+  samediHeureFin   String @default("17:00")
+  maxRdvParJour    Int    @default(4)
 }

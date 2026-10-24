@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnnouncementBanner from "@/components/layout/AnnouncementBanner";
+import ViewTracker from "@/components/layout/ViewTracker";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${manrope.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-parchment text-body font-sans">
+        <ViewTracker />
         <AnnouncementBanner />
         <Navbar />
         <main className="flex-1">{children}</main>
