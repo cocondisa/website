@@ -5,6 +5,7 @@ import DisponibilitesSettings from "@/components/admin/DisponibilitesSettings";
 import VacancesCalendar from "@/components/admin/VacancesCalendar";
 import BannerSettings from "@/components/admin/BannerSettings";
 import StatsVues from "@/components/admin/StatsVues";
+import CartesCadeauxList from "@/components/admin/CartesCadeauxList";
 import LogoutButton from "@/components/admin/LogoutButton";
 
 export const metadata: Metadata = {
@@ -41,6 +42,11 @@ export default function AdminPage() {
         </div>
 
         <AdminDashboard />
+
+        <div className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold text-walnut">Cartes cadeaux</h2>
+          <CartesCadeauxList />
+        </div>
 
         <div className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold text-walnut">Bandeau d&apos;annonce</h2>

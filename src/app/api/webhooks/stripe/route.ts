@@ -6,10 +6,15 @@ import {
   clientConfirmationEmail,
   EMAIL_FROM,
   notificationEmail,
+  carteCadeauDestinataireEmail,
+  carteCadeauAcheteurEmail,
+  carteCadeauNotificationEmail,
   resend,
 } from "@/lib/resend";
 import { genererFacturePdf, genererNumeroFacture } from "@/lib/facture";
 import { prestations, type PrestationId } from "@/lib/prestations";
+
+const VALIDITE_CARTE_CADEAU_JOURS = 366; // > 1 an, minimum légal en France
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
@@ -126,6 +131,90 @@ async function releaseReservation(reservationId: string) {
   ]);
 }
 
+async function confirmCarteCadeau(carteCadeauId: string, montantTotalCentimes: number | null) {
+  const carte = await prisma.carteCadeau.findUnique({ where: { id: carteCadeauId } });
+
+  if (!carte || carte.statut !== "EN_ATTENTE_PAIEMENT") return;
+
+  const prestation = prestations[carte.prestationId as PrestationId];
+  const montantCentimes = montantTotalCentimes ?? carte.montantCentimes;
+  const expiresAt = new Date(Date.now() + VALIDITE_CARTE_CADEAU_JOURS * 24 * 60 * 60 * 1000);
+
+  const numero = await prisma.$transaction(async (tx) => {
+    await tx.carteCadeau.update({
+      where: { id: carteCadeauId },
+      data: { statut: "ACTIVE", expiresAt },
+    });
+    return genererNumeroFacture(tx);
+  });
+
+  const facturePdf = await genererFacturePdf({
+    numero,
+    nomClient: carte.acheteurNom,
+    emailClient: carte.acheteurEmail,
+    datePrestation: carte.createdAt,
+    montantCentimes,
+    nomPrestation: `Carte cadeau — ${prestation.nom}`,
+  });
+
+  await prisma.facture.create({
+    data: { numero, carteCadeauId, pdf: Buffer.from(facturePdf) },
+  });
+
+  const dateExpirationFormatee = dateFormatter.format(expiresAt);
+  const notificationRecipient = process.env.NOTIFICATION_EMAIL;
+  const factureAttachment = {
+    filename: `facture-${numero}.pdf`,
+    content: Buffer.from(facturePdf),
+    content_type: "application/pdf",
+  };
+
+  await Promise.allSettled([
+    resend.emails.send({
+      from: EMAIL_FROM,
+      to: carte.destinataireEmail,
+      ...carteCadeauDestinataireEmail({
+        acheteurNom: carte.acheteurNom,
+        nomPrestation: prestation.nom,
+        code: carte.code,
+        message: carte.message,
+        dateExpirationFormatee,
+      }),
+    }),
+    resend.emails.send({
+      from: EMAIL_FROM,
+      to: carte.acheteurEmail,
+      attachments: [factureAttachment],
+      ...carteCadeauAcheteurEmail({
+        nomPrestation: prestation.nom,
+        destinataireEmail: carte.destinataireEmail,
+        code: carte.code,
+      }),
+    }),
+    notificationRecipient
+      ? resend.emails.send({
+          from: EMAIL_FROM,
+          to: notificationRecipient,
+          ...carteCadeauNotificationEmail({
+            nomPrestation: prestation.nom,
+            code: carte.code,
+            acheteurNom: carte.acheteurNom,
+            acheteurEmail: carte.acheteurEmail,
+            destinataireEmail: carte.destinataireEmail,
+            montantEuros: (montantCentimes / 100).toFixed(2).replace(".", ","),
+          }),
+        })
+      : Promise.resolve(),
+  ]);
+}
+
+async function releaseCarteCadeau(carteCadeauId: string) {
+  await prisma.carteCadeau.updateMany({
+    where: { id: carteCadeauId, statut: "EN_ATTENTE_PAIEMENT" },
+    data: { statut: "ANNULEE" },
+  });
+}
+
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const signature = request.headers.get("stripe-signature");
@@ -147,13 +236,17 @@ export async function POST(request: Request) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       const reservationId = session.metadata?.reservationId;
+      const carteCadeauId = session.metadata?.carteCadeauId;
       if (reservationId) await confirmReservation(reservationId, session.amount_total);
+      if (carteCadeauId) await confirmCarteCadeau(carteCadeauId, session.amount_total);
       break;
     }
     case "checkout.session.expired": {
       const session = event.data.object as Stripe.Checkout.Session;
       const reservationId = session.metadata?.reservationId;
+      const carteCadeauId = session.metadata?.carteCadeauId;
       if (reservationId) await releaseReservation(reservationId);
+      if (carteCadeauId) await releaseCarteCadeau(carteCadeauId);
       break;
     }
     default:

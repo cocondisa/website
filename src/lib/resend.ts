@@ -151,3 +151,110 @@ export function notificationEmail({
     html: emailLayout(content),
   };
 }
+
+export function carteCadeauDestinataireEmail({
+  acheteurNom,
+  nomPrestation,
+  code,
+  message,
+  dateExpirationFormatee,
+}: {
+  acheteurNom: string;
+  nomPrestation: string;
+  code: string;
+  message?: string | null;
+  dateExpirationFormatee: string;
+}) {
+  const content = `
+    <h1 style="color: #412B0B; font-size: 21px; margin: 0 0 16px;">🎁 Vous avez reçu un cadeau !</h1>
+    <p style="margin: 0 0 16px;">
+      <strong>${escapeHtml(acheteurNom)}</strong> vous offre
+      <strong>${escapeHtml(nomPrestation)}</strong> chez Cocon d&apos;Isa.
+    </p>
+    ${
+      message
+        ? `<div style="background-color: #FFD6C0; border-radius: 12px; padding: 16px 20px; margin: 0 0 16px; font-style: italic;">
+            « ${escapeHtml(message)} »
+          </div>`
+        : ""
+    }
+    <div style="background-color: #FDF8F3; border: 1px dashed #E8825F; border-radius: 12px; padding: 16px 20px; margin: 0 0 16px; text-align: center;">
+      <p style="margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #7A5F4A;">Votre code cadeau</p>
+      <p style="margin: 0; font-size: 22px; font-weight: 700; color: #412B0B; letter-spacing: 0.05em;">${escapeHtml(code)}</p>
+    </div>
+    <p style="margin: 0 0 16px;">
+      Pour en profiter, <a href="mailto:${contact.email}" style="color: #E8825F; font-weight: 600;">contactez Isabelle</a>
+      ou appelez-la au ${contact.telephone} en mentionnant ce code : elle fixera votre rendez-vous avec vous.
+    </p>
+    <p style="margin: 0; font-size: 13px; color: #7A5F4A;">
+      Valable jusqu&apos;au ${escapeHtml(dateExpirationFormatee)}.
+    </p>
+  `;
+
+  return {
+    subject: `${acheteurNom} vous offre ${nomPrestation} 🎁`,
+    html: emailLayout(content),
+  };
+}
+
+export function carteCadeauAcheteurEmail({
+  nomPrestation,
+  destinataireEmail,
+  code,
+}: {
+  nomPrestation: string;
+  destinataireEmail: string;
+  code: string;
+}) {
+  const content = `
+    <h1 style="color: #412B0B; font-size: 21px; margin: 0 0 16px;">Votre carte cadeau est envoyée</h1>
+    <p style="margin: 0 0 16px;">
+      Merci pour votre achat ! <strong>${escapeHtml(nomPrestation)}</strong> a été envoyé
+      à <strong>${escapeHtml(destinataireEmail)}</strong>, avec le code
+      <strong>${escapeHtml(code)}</strong> pour réserver.
+    </p>
+    <p style="margin: 20px 0 0; font-size: 13px; color: #7A5F4A;">
+      Votre facture est jointe à cet e-mail au format PDF.
+    </p>
+  `;
+
+  return {
+    subject: "Votre carte cadeau Cocon d'Isa est envoyée",
+    html: emailLayout(content),
+  };
+}
+
+export function carteCadeauNotificationEmail({
+  nomPrestation,
+  code,
+  acheteurNom,
+  acheteurEmail,
+  destinataireEmail,
+  montantEuros,
+}: {
+  nomPrestation: string;
+  code: string;
+  acheteurNom: string;
+  acheteurEmail: string;
+  destinataireEmail: string;
+  montantEuros: string;
+}) {
+  const content = `
+    <h1 style="color: #412B0B; font-size: 21px; margin: 0 0 16px;">🎁 Carte cadeau vendue</h1>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; font-size: 14px;">
+      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600; width: 130px;">Code</td><td style="padding: 4px 0;">${escapeHtml(code)}</td></tr>
+      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Prestation</td><td style="padding: 4px 0;">${escapeHtml(nomPrestation)}</td></tr>
+      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Montant</td><td style="padding: 4px 0;">${escapeHtml(montantEuros)} €</td></tr>
+      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Acheteur</td><td style="padding: 4px 0;">${escapeHtml(acheteurNom)} — ${escapeHtml(acheteurEmail)}</td></tr>
+      <tr><td style="padding: 4px 0; color: #412B0B; font-weight: 600;">Destinataire</td><td style="padding: 4px 0;">${escapeHtml(destinataireEmail)}</td></tr>
+    </table>
+    <p style="margin: 16px 0 0; font-size: 13px; color: #7A5F4A;">
+      Quand le destinataire vous contactera avec ce code, retrouvez-le dans l&apos;espace admin pour le marquer comme utilisé une fois le rendez-vous fixé.
+    </p>
+  `;
+
+  return {
+    subject: `Carte cadeau vendue — ${code}`,
+    html: emailLayout(content),
+  };
+}

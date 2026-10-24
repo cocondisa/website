@@ -26,6 +26,13 @@ enum OrigineCreneau {
   MANUEL // ajouté à la main par Isabelle depuis l'admin
 }
 
+enum StatutCarteCadeau {
+  EN_ATTENTE_PAIEMENT
+  ACTIVE
+  UTILISEE
+  ANNULEE
+}
+
 model Creneau {
   id           String         @id @default(cuid())
   date         DateTime // date et heure de début du créneau
@@ -63,16 +70,41 @@ model Reservation {
   facture         Facture?
 }
 
-// Facture générée automatiquement à la confirmation du paiement (une par
-// réservation). Le PDF est conservé en base pour l'archivage comptable
-// d'Isabelle, en plus d'être joint à ses e-mails de notification.
+// Facture générée automatiquement à la confirmation du paiement — d'une
+// réservation ou d'une carte cadeau (exactement l'un des deux). Le PDF est
+// conservé en base pour l'archivage comptable d'Isabelle, en plus d'être
+// joint à ses e-mails de notification.
 model Facture {
-  id            String      @id @default(cuid())
-  numero        String      @unique // format "2026-0001", séquentiel par année
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
-  reservationId String      @unique
+  id            String       @id @default(cuid())
+  numero        String       @unique // format "2026-0001", séquentiel par année
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  reservationId String?      @unique
+  carteCadeau   CarteCadeau? @relation(fields: [carteCadeauId], references: [id])
+  carteCadeauId String?      @unique
   pdf           Bytes
-  createdAt     DateTime    @default(now())
+  createdAt     DateTime     @default(now())
+}
+
+// Carte cadeau : achetée depuis le bouton "Offrir" sur une prestation, sans
+// créneau choisi à l'achat — le code est envoyé au destinataire, qui
+// contacte ensuite Isabelle pour fixer son rendez-vous. La réservation
+// finale (créée manuellement par Isabelle une fois le code vérifié) n'est
+// pas reliée ici : seul le statut UTILISEE/ANNULEE est mis à jour à la main
+// depuis /admin, une fois le rendez-vous pris.
+model CarteCadeau {
+  id                String            @id @default(cuid())
+  code              String            @unique // ex. "CADEAU-7F3K9Q"
+  prestationId      String
+  montantCentimes   Int
+  acheteurNom       String
+  acheteurEmail     String
+  destinataireEmail String
+  message           String?
+  statut            StatutCarteCadeau @default(EN_ATTENTE_PAIEMENT)
+  stripeSessionId   String?           @unique
+  expiresAt         DateTime? // validité légale minimale d'un an en France
+  createdAt         DateTime          @default(now())
+  facture           Facture?
 }
 
 // Périodes de vacances / jours off d'Isabelle : masquent automatiquement les

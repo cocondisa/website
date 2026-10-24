@@ -70,6 +70,13 @@ export default function Tarifs() {
             <ButtonLink href="/rendez-vous?prestation=bain-enveloppe" className="mt-auto w-full">
               Réserver
             </ButtonLink>
+            <ButtonLink
+              href="/offrir?prestation=bain-enveloppe"
+              variant="ghost"
+              className="mt-2 w-full !py-0 text-xs"
+            >
+              Offrir en cadeau 🎁
+            </ButtonLink>
           </div>
 
           {cartes.map((item) => {
@@ -101,6 +108,13 @@ export default function Tarifs() {
                         >
                           Réserver →
                         </ButtonLink>
+                        <ButtonLink
+                          href={`/offrir?prestation=${p.id}`}
+                          variant="ghost"
+                          className="mt-1 !px-0 !py-0 text-xs"
+                        >
+                          Offrir 🎁
+                        </ButtonLink>
                       </div>
                     ))}
                   </div>
@@ -127,6 +141,15 @@ export default function Tarifs() {
                 >
                   Réserver
                 </ButtonLink>
+                {!p.tarifVariable && (
+                  <ButtonLink
+                    href={`/offrir?prestation=${p.id}`}
+                    variant="ghost"
+                    className="mt-2 w-full !py-0 text-xs"
+                  >
+                    Offrir en cadeau 🎁
+                  </ButtonLink>
+                )}
               </div>
             );
           })}
